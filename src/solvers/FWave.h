@@ -69,8 +69,8 @@ class tsunami_lab::solvers::FWave {
 		 * @param out_netUpdateLeft will be set to the net-updates for the left side; 0: height, 1: momentum.
 		 * @param out_netUpdateRight will be set to the net-updates for the left side; 0: height, 1: momentum.
 		 */
-		static void computeNetUpdates(	float in_stateLeft[2], 
-	 												float in_stateRight[2], 
-													float out_netUpdateLeft[2], 
-													float out_netUpdateRight[2] );
+		static void netUpdates(	float in_stateLeft[2], 
+	 									float in_stateRight[2], 
+										float out_netUpdateLeft[2], 
+										float out_netUpdateRight[2] );
 };

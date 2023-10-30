@@ -47,6 +47,7 @@ void FWave::computeInvertedEigenmatrix(float in_eigenvalues[2], float out_invert
 void FWave::flux(float state[2], float flux[2]) {
 	float height = state[0];
 	float momentum = state[1];
+
 	flux[0] = momentum;
 	flux[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
 }
@@ -67,8 +68,7 @@ void FWave::computeEigencoefficients(float in_stateLeft[2], float in_stateRight[
 	out_eigencoefficients[1] =	in_invertedEigenmatrix[1][0] * fluxJump[0] + in_invertedEigenmatrix[1][1] * fluxJump[1];
 }
 
-void FWave::computeNetUpdates(float in_stateLeft[2], float in_stateRight[2], float out_netUpdateLeft[2], float out_netUpdateRight[2]) {
-	
+void FWave::netUpdates(float in_stateLeft[2], float in_stateRight[2], float out_netUpdateLeft[2], float out_netUpdateRight[2]) {
 	float eigenvalues[2];
 	computeEigenvalues(in_stateLeft, in_stateRight, eigenvalues);
 
@@ -77,7 +77,6 @@ void FWave::computeNetUpdates(float in_stateLeft[2], float in_stateRight[2], flo
 
 	float eigencoefficients[2];
 	computeEigencoefficients(in_stateLeft, in_stateRight, invertedEigenmatrix, eigencoefficients);
-
 
 	float waves[2][2] = {
 		{ eigencoefficients[0], eigencoefficients[0] * eigenvalues[0] },
