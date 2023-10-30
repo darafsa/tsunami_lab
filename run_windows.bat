@@ -1,0 +1,1 @@
+wsl "/mnt/c/Programming/Git Projects/tsunami_lab/run_linux.sh"
