@@ -1,11 +1,11 @@
 cd "/mnt/c/Programming/Git Projects/tsunami_lab"
 
 rm -R "build"
-scons -Q debug=1
+scons -Q debug=0
 cd "build"
 
 ./tests
-# ./tsunami_lab 10
+./tsunami_lab 10
 
 cd "/mnt/c/Programming/Git Projects/tsunami_lab"
 
