@@ -44,22 +44,19 @@ void FWave::computeInvertedEigenmatrix(float in_eigenvalues[2], float out_invert
 	out_invertedEigenmatrix[1][1] =  invertedMatrixDeterminant;
 }
 
-void FWave::flux(float momentum, float height, float fluxJump[2]) {
-	fluxJump[0] = momentum;
-	fluxJump[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
+void FWave::flux(float state[2], float flux[2]) {
+	float height = state[0];
+	float momentum = state[1];
+	flux[0] = momentum;
+	flux[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
 }
 
 void FWave::computeEigencoefficients(float in_stateLeft[2], float in_stateRight[2], float in_invertedEigenmatrix[2][2], float out_eigencoefficients[2]) {
-	float heightLeft = in_stateLeft[0];
-	float heightRight = in_stateRight[0];
-	float momentumLeft = in_stateLeft[1];
-	float momentumRight = in_stateRight[1];
-
 	float fluxJumpLeft[2];
 	float fluxJumpRight[2];
 
-	flux(momentumLeft, heightLeft, fluxJumpLeft);
-	flux(momentumRight, heightRight, fluxJumpRight);
+	flux(in_stateLeft, fluxJumpLeft);
+	flux(in_stateRight, fluxJumpRight);
 
 	float fluxJump[2] = {
 		fluxJumpRight[0] - fluxJumpLeft[0],

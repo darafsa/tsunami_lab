@@ -31,6 +31,14 @@ class tsunami_lab::solvers::FWave {
 													float out_eigenvaluesRoe[2] );
 
 		/**
+		 * @brief Calculates the flux function as a vaector.
+		 * 
+		 * @param in_state state of one cell; 0: height, 1: momentum.
+		 * @param out_flux will be set to the flux function values; 0: hu, 1: hu^2+0.5gh^2.
+		 */
+		static void flux(float in_state[2], float out_flux[2]);
+
+		/**
 		 * @brief Computes the inverted eigenmatrix.
 		 * 
 		 * @param in_eigenvalues Roe eigenvalues; 0: lambda^Roe_1, 1: lambda^Roe_2.
