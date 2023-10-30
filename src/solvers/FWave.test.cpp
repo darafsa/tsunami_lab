@@ -19,13 +19,13 @@ TEST_CASE("Test the computation of the Eigenvalues (FWave speeds).", "[FWaveEige
  *
  * FWave height: 9.5
  * FWave velocity: (sqrt(10) * -3 + 3 * 3) / ( sqrt(10) + sqrt(9) )
- *               = -0.0790021169691720
+ *                  = -0.0790021169691720
  * FWave speeds: s1 = -0.079002116969172024 - sqrt(9.80665 * 9.5) = -9.7311093998375095
- *             s2 = -0.079002116969172024 + sqrt(9.80665 * 9.5) =  9.5731051658991654
+ *               s2 = -0.079002116969172024 + sqrt(9.80665 * 9.5) =  9.5731051658991654
  */
 
-float stateLeft[2] = {10, 9}
-float stateRight[2] = {-3, 3};
+float stateLeft[2] =  {10, -3}
+float stateRight[2] = {9, 3};
 float eigenvaluesRoe[2]
 tsunami_lab::solvers::FWave::computeEigenvalues(stateLeft,
                                                 stateLeft,
@@ -78,26 +78,7 @@ REQUIRE( == Approx());
 TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
 {
 /*
- * Test case supersonic problem
- *
- *      left | right
- *  h:   1   | 1
- *  u:   100 | 10
- *  hu:  100 | 100
- *
- */
-
-float stateLeft[2] = {1, 100};
-float stateRight[2] = {1, 10};
-float netUpdateLeft[2];
-float netUpdateRight[2];
-tsunami_lab::solvers::FWave::netUpdates(stateLeft,
-                                        stateRight,
-                                        netUpdateLeft,
-                                        netUpdateRight);
-
-/*
- * Test case supersonic problem
+ * Test case
  *
  *      left | right
  *  h:    5  | 3
@@ -111,12 +92,61 @@ float stateRight[2] = {3, 21};
 float netUpdateLeft[2];
 float netUpdateRight[2];
 tsunami_lab::solvers::FWave::netUpdates(stateLeft,
-        stateRight,
-        netUpdateLeft,
-        netUpdateRight);
+                                        stateRight,
+                                        netUpdateLeft,
+                                        netUpdateRight);
 
-REQUIRE(l_netUpdatesL[0] == Approx(10.942));
-REQUIRE(l_netUpdatesL[1] == Approx(-53.5962));
+REQUIRE(netUpdateLeft[0] == Approx(10.942));
+REQUIRE(netUpdateLeft[1] == Approx(-53.5962));
 
-REQUIRE(l_netUpdatesR[0] == Approx(25.058));
-REQUIRE(l_netUpdatesR[1] == Approx(191.143));
+REQUIRE(netUpdateRight[0] == Approx(25.058));
+REQUIRE(netUpdateRight[1] == Approx(191.143));
+
+/*
+ * Test case dam break
+ *
+ *      left | right
+ *  h:   13  | 11
+ *  hu:    0 | 0
+ *
+ */
+
+float stateLeft[2]  = {13, 0};
+float stateRight[2] = {11, 0};
+float netUpdateLeft[2];
+float netUpdateRight[2];
+tsunami_lab::solvers::FWave::netUpdates(stateLeft,
+                                        stateRight,
+                                        netUpdateLeft,
+                                        netUpdateRight);
+
+REQUIRE(netUpdatesLeft[0] == Approx(?));
+REQUIRE(netUpdatesLeft[1] == Approx(?));
+
+REQUIRE(netUpdatesRight[0] == Approx(?));
+REQUIRE(netUpdatesRight[1] == Approx(?));
+
+/*
+ * Test case supersonic problem
+ *
+ *      left | right
+ *  h:   1   | 1
+ *  u:   100 | 10
+ *  hu:  100 | 100
+ *
+ */
+
+float stateLeft[2] =  {1, 100};
+float stateRight[2] = {1, 10};
+float netUpdateLeft[2];
+float netUpdateRight[2];
+tsunami_lab::solvers::FWave::netUpdates(stateLeft,
+                                        stateRight,
+                                        netUpdateLeft,
+                                        netUpdateRight);
+
+REQUIRE(netUpdatesLeft[0] == Approx(0));
+REQUIRE(netUpdatesLeft[1] == Approx(0));
+
+REQUIRE(netUpdatesRight[0] == Approx(-90));
+REQUIRE(netUpdatesRight[1] == Approx(-9900.002044988));
