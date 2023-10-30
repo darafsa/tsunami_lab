@@ -10,6 +10,8 @@
 
 #include <cmath>
 
+#include <iostream>
+
 using namespace tsunami_lab::solvers;
 
 void FWave::computeEigenvalues(float in_stateLeft[2], float in_stateRight[2], float out_eigenvaluesRoe[2]) {
@@ -42,19 +44,30 @@ void FWave::computeInvertedEigenmatrix(float in_eigenvalues[2], float out_invert
 	out_invertedEigenmatrix[1][1] =  invertedMatrixDeterminant;
 }
 
+void FWave::flux(float momentum, float height, float fluxJump[2]) {
+	fluxJump[0] = momentum;
+	fluxJump[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
+}
+
 void FWave::computeEigencoefficients(float in_stateLeft[2], float in_stateRight[2], float in_invertedEigenmatrix[2][2], float out_eigencoefficients[2]) {
 	float heightLeft = in_stateLeft[0];
 	float heightRight = in_stateRight[0];
 	float momentumLeft = in_stateLeft[1];
 	float momentumRight = in_stateRight[1];
 
-	float flux_jump[2] = {
-		momentumRight - momentumLeft,
-		(momentumRight*momentumRight + 0.5f*FWave::const_g*heightRight*heightRight) - (momentumLeft*momentumLeft + 0.5f*FWave::const_g*heightLeft*heightLeft)
+	float fluxJumpLeft[2];
+	float fluxJumpRight[2];
+
+	flux(momentumLeft, heightLeft, fluxJumpLeft);
+	flux(momentumRight, heightRight, fluxJumpRight);
+
+	float fluxJump[2] = {
+		fluxJumpRight[0] - fluxJumpLeft[0],
+		fluxJumpRight[1] - fluxJumpLeft[1]
 	};
 
-	out_eigencoefficients[0] = in_invertedEigenmatrix[0][0] * flux_jump[0] + in_invertedEigenmatrix[0][1] * flux_jump[1];
-	out_eigencoefficients[1] =	in_invertedEigenmatrix[1][0] * flux_jump[0] + in_invertedEigenmatrix[1][1] * flux_jump[1];
+	out_eigencoefficients[0] = in_invertedEigenmatrix[0][0] * fluxJump[0] + in_invertedEigenmatrix[0][1] * fluxJump[1];
+	out_eigencoefficients[1] =	in_invertedEigenmatrix[1][0] * fluxJump[0] + in_invertedEigenmatrix[1][1] * fluxJump[1];
 }
 
 void FWave::computeNetUpdates(float in_stateLeft[2], float in_stateRight[2], float out_netUpdateLeft[2], float out_netUpdateRight[2]) {
