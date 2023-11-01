@@ -6,6 +6,7 @@
  **/
 #include "WavePropagation1d.h"
 #include "../solvers/FWave.h"
+#include "../solvers/Roe.h"
 
 tsunami_lab::patches::WavePropagation1d::WavePropagation1d( t_idx i_nCells ) {
   m_nCells = i_nCells;
@@ -32,7 +33,7 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
   }
 }
 
-void tsunami_lab::patches::WavePropagation1d::timeStep( t_real i_scaling ) {
+void tsunami_lab::patches::WavePropagation1d::timeStep( t_real i_scaling, Solver i_solver ) {
   // pointers to old and new data
   t_real * l_hOld = m_h[m_step];
   t_real * l_huOld = m_hu[m_step];
@@ -55,14 +56,23 @@ void tsunami_lab::patches::WavePropagation1d::timeStep( t_real i_scaling ) {
 
     // compute net-updates
     t_real l_netUpdates[2][2];
+	 
+	 t_real l_stateLeft[2] = {l_hOld[l_ceL], l_huOld[l_ceL]};
+	 t_real l_stateRight[2] = {l_hOld[l_ceR], l_huOld[l_ceR]};
 
-	 float stateLeft[2] = {l_hOld[l_ceL], l_huOld[l_ceL]};
-	 float stateRight[2] = {l_hOld[l_ceR], l_huOld[l_ceR]};
-
-    solvers::FWave::netUpdates( stateLeft, 
-	 									  stateRight, 
+	 if ( i_solver == FWave ) {
+		solvers::FWave::netUpdates( l_stateLeft, 
+	 									  l_stateRight, 
                                 l_netUpdates[0],
                                 l_netUpdates[1] );
+	 } else {
+		solvers::Roe::netUpdates( l_stateLeft[0], 
+	 									  l_stateRight[0], 
+	 									  l_stateLeft[1], 
+	 									  l_stateRight[1], 
+                                l_netUpdates[0],
+                                l_netUpdates[1] );
+	 }
 
     // update the cells' quantities
     l_hNew[l_ceL]  -= i_scaling * l_netUpdates[0][0];

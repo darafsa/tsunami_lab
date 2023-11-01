@@ -22,16 +22,19 @@ int main( int   i_argc,
   // set cell size
   tsunami_lab::t_real l_dxy = 1;
 
+  // solver type
+  tsunami_lab::patches::WavePropagation1d::Solver l_solverType;
+
   std::cout << "####################################" << std::endl;
   std::cout << "### Tsunami Lab                  ###" << std::endl;
   std::cout << "###                              ###" << std::endl;
   std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
   std::cout << "####################################" << std::endl;
 
-  if( i_argc != 2 ) {
+  if( i_argc != 3 ) {
     std::cerr << "invalid number of arguments, usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab N_CELLS_X" << std::endl;
-    std::cerr << "where N_CELLS_X is the number of cells in x-direction." << std::endl;
+    std::cerr << "  ./build/tsunami_lab N_CELLS_X SOLVER" << std::endl;
+    std::cerr << "where N_CELLS_X is the number of cells in x-direction and SOLVER is the solver type to use." << std::endl;
     return EXIT_FAILURE;
   }
   else {
@@ -41,6 +44,16 @@ int main( int   i_argc,
       return EXIT_FAILURE;
     }
     l_dxy = 10.0 / l_nx;
+
+	 std::string l_solver = i_argv[2];
+	 if (l_solver == "FWAVE") {
+		l_solverType = tsunami_lab::patches::WavePropagation::FWave;
+	 } else if (l_solver == "ROE") {
+		l_solverType = tsunami_lab::patches::WavePropagation::Roe;
+	 } else {
+		std::cerr << "invalid solver type. Please use either ROE or FWAVE" << std::endl;
+      return EXIT_FAILURE;
+	 }
   }
   std::cout << "runtime configuration" << std::endl;
   std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
@@ -134,7 +147,8 @@ int main( int   i_argc,
     }
 
     l_waveProp->setGhostOutflow();
-    l_waveProp->timeStep( l_scaling );
+	 std::string solver = "FWave";
+    l_waveProp->timeStep( l_scaling, l_solverType );
 
     l_timeStep++;
     l_simTime += l_dt;
