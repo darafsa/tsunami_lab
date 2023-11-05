@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         run: |
-          sphinx-build Sphinx/source Sphinx/build
+          sphinx-build -M html Sphinx/source Sphinx/build
           touch Sphinx/build/html/.nojekyll
       
       - name: Deploy
