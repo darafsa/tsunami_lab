@@ -1,0 +1,40 @@
+##
+# @author Marek Sommerfeld (marek.sommerfeld AT uni-jena.de)
+# @section DESCRIPTION
+# Continuous integration using GitHub Actions for Sphinx.
+##
+name: Sphinx User Documentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: 0 0 * * *
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencies
+        run: |
+          sudo apt-get install python3-sphinx
+          sudo apt install python3-pip
+          sudo pip3 install sphinx-rtd-theme
+
+      - name: Build
+        run: |
+          cd Sphinx
+          sphinx-build -M html source build
+      
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/html
