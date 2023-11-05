@@ -24,9 +24,9 @@ TEST_CASE("Test the computation of the Eigenvalues (FWave speeds).", "[FWaveEige
  *               s2 = -0.079002116969172024 + sqrt(9.80665 * 9.5) =  9.5731051658991654
  */
 
-float stateLeft[2] =  {10, -3};
-float stateRight[2] = {9, 3};
-float eigenvaluesRoe[2];
+real stateLeft[2] =  {10, -3};
+real stateRight[2] = {9, 3};
+real eigenvaluesRoe[2];
 tsunami_lab::solvers::FWave::computeEigenvalues(stateLeft,
                                                 stateRight,
                                                 eigenvaluesRoe);
@@ -52,8 +52,8 @@ TEST_CASE("Test the computation of the InvertedEigenmatrix.", "[FWaveInvertedEig
  *        | 1/4                -1/4 |
  */
 
-float eigenvalues[2] = {1, 5};
-float invertedEigenmatrix[2][2];
+real eigenvalues[2] = {1, 5};
+real invertedEigenmatrix[2][2];
 tsunami_lab::solvers::FWave::computeInvertedEigenmatrix(eigenvalues,
                                                         invertedEigenmatrix);
 
@@ -87,10 +87,10 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
  *
  */
 
-float stateLeft1[2] = {5, -15};
-float stateRight1[2] = {3, 21};
-float netUpdateLeft1[2];
-float netUpdateRight1[2];
+real stateLeft1[2] = {5, -15};
+real stateRight1[2] = {3, 21};
+real netUpdateLeft1[2];
+real netUpdateRight1[2];
 tsunami_lab::solvers::FWave::netUpdates(stateLeft1,
                                         stateRight1,
                                         netUpdateLeft1,
@@ -111,10 +111,10 @@ REQUIRE(netUpdateRight1[1] == Approx(191.143));
  *
  */
 
-float stateLeft2[2]  = {13, 0};
-float stateRight2[2] = {11, 0};
-float netUpdateLeft2[2];
-float netUpdateRight2[2];
+real stateLeft2[2]  = {13, 0};
+real stateRight2[2] = {11, 0};
+real netUpdateLeft2[2];
+real netUpdateRight2[2];
 tsunami_lab::solvers::FWave::netUpdates(stateLeft2,
                                         stateRight2,
                                         netUpdateLeft2,
@@ -136,10 +136,10 @@ tsunami_lab::solvers::FWave::netUpdates(stateLeft2,
  *
  */
 
-float stateLeft3[2] =  {1, 100};
-float stateRight3[2] = {1, 10};
-float netUpdateLeft3[2];
-float netUpdateRight3[2];
+real stateLeft3[2] =  {1, 100};
+real stateRight3[2] = {1, 10};
+real netUpdateLeft3[2];
+real netUpdateRight3[2];
 tsunami_lab::solvers::FWave::netUpdates(stateLeft3,
                                         stateRight3,
                                         netUpdateLeft3,

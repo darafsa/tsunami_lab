@@ -9,34 +9,33 @@
 #include "FWave.h"
 
 #include <cmath>
-
 #include <iostream>
 
 using namespace tsunami_lab::solvers;
 
-void FWave::computeEigenvalues(float in_stateLeft[2], float in_stateRight[2], float out_eigenvaluesRoe[2]) {
-	float heightLeft = in_stateLeft[0];
-	float heightRight = in_stateRight[0];
-	float momentumLeft = in_stateLeft[1];
-	float momentumRight = in_stateRight[1];
+void FWave::computeEigenvalues(real in_stateLeft[2], real in_stateRight[2], real out_eigenvaluesRoe[2]) {
+	real heightLeft = in_stateLeft[0];
+	real heightRight = in_stateRight[0];
+	real momentumLeft = in_stateLeft[1];
+	real momentumRight = in_stateRight[1];
 
-	float sqrtHeightLeft = sqrt(heightLeft);
-	float sqrtHeightRight = sqrt(heightRight);
-	float particleVelocityLeft = momentumLeft / heightLeft;
-	float particleVelocityRight = momentumRight / heightRight;
+	real sqrtHeightLeft = sqrt(heightLeft);
+	real sqrtHeightRight = sqrt(heightRight);
+	real particleVelocityLeft = momentumLeft / heightLeft;
+	real particleVelocityRight = momentumRight / heightRight;
 	
-	float heightRoe = 0.5 * (heightLeft + heightRight);
-	float particleVelocityRoe = particleVelocityLeft * sqrtHeightLeft + particleVelocityRight * sqrtHeightRight;
+	real heightRoe = 0.5 * (heightLeft + heightRight);
+	real particleVelocityRoe = particleVelocityLeft * sqrtHeightLeft + particleVelocityRight * sqrtHeightRight;
 	particleVelocityRoe /= sqrtHeightLeft + sqrtHeightRight;
 
-	float sqrtGTimesHeight = FWave::const_gSqrt * sqrt(heightRoe);
+	real sqrtGTimesHeight = FWave::const_gSqrt * sqrt(heightRoe);
 	
 	out_eigenvaluesRoe[0] = particleVelocityRoe - sqrtGTimesHeight;
 	out_eigenvaluesRoe[1] = particleVelocityRoe + sqrtGTimesHeight;
 }
 
-void FWave::computeInvertedEigenmatrix(float in_eigenvalues[2], float out_invertedEigenmatrix[2][2]) {
-	float invertedMatrixDeterminant = 1 / (in_eigenvalues[1] - in_eigenvalues[0]);
+void FWave::computeInvertedEigenmatrix(real in_eigenvalues[2], real out_invertedEigenmatrix[2][2]) {
+	real invertedMatrixDeterminant = 1 / (in_eigenvalues[1] - in_eigenvalues[0]);
 
 	out_invertedEigenmatrix[0][0] =  invertedMatrixDeterminant * in_eigenvalues[1];
 	out_invertedEigenmatrix[0][1] = -invertedMatrixDeterminant;
@@ -44,22 +43,22 @@ void FWave::computeInvertedEigenmatrix(float in_eigenvalues[2], float out_invert
 	out_invertedEigenmatrix[1][1] =  invertedMatrixDeterminant;
 }
 
-void FWave::flux(float state[2], float flux[2]) {
-	float height = state[0];
-	float momentum = state[1];
+void FWave::flux(real state[2], real flux[2]) {
+	real height = state[0];
+	real momentum = state[1];
 
 	flux[0] = momentum;
 	flux[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
 }
 
-void FWave::computeEigencoefficients(float in_stateLeft[2], float in_stateRight[2], float in_invertedEigenmatrix[2][2], float out_eigencoefficients[2]) {
-	float fluxJumpLeft[2];
-	float fluxJumpRight[2];
+void FWave::computeEigencoefficients(real in_stateLeft[2], real in_stateRight[2], real in_invertedEigenmatrix[2][2], real out_eigencoefficients[2]) {
+	real fluxJumpLeft[2];
+	real fluxJumpRight[2];
 
 	flux(in_stateLeft, fluxJumpLeft);
 	flux(in_stateRight, fluxJumpRight);
 
-	float fluxJump[2] = {
+	real fluxJump[2] = {
 		fluxJumpRight[0] - fluxJumpLeft[0],
 		fluxJumpRight[1] - fluxJumpLeft[1]
 	};
@@ -68,17 +67,17 @@ void FWave::computeEigencoefficients(float in_stateLeft[2], float in_stateRight[
 	out_eigencoefficients[1] =	in_invertedEigenmatrix[1][0] * fluxJump[0] + in_invertedEigenmatrix[1][1] * fluxJump[1];
 }
 
-void FWave::netUpdates(float in_stateLeft[2], float in_stateRight[2], float out_netUpdateLeft[2], float out_netUpdateRight[2]) {
-	float eigenvalues[2];
+void FWave::netUpdates(real in_stateLeft[2], real in_stateRight[2], real out_netUpdateLeft[2], real out_netUpdateRight[2]) {
+	real eigenvalues[2];
 	computeEigenvalues(in_stateLeft, in_stateRight, eigenvalues);
 
-	float invertedEigenmatrix[2][2];
+	real invertedEigenmatrix[2][2];
 	computeInvertedEigenmatrix(eigenvalues, invertedEigenmatrix);
 
-	float eigencoefficients[2];
+	real eigencoefficients[2];
 	computeEigencoefficients(in_stateLeft, in_stateRight, invertedEigenmatrix, eigencoefficients);
 
-	float waves[2][2] = {
+	real waves[2][2] = {
 		{ eigencoefficients[0], eigencoefficients[0] * eigenvalues[0] },
 		{ eigencoefficients[1], eigencoefficients[1] * eigenvalues[1] }
 	};
