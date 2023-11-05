@@ -34,13 +34,13 @@ class tsunami_lab::setups::ShockShock1d: public Setup {
     /**
      * Constructor.
      *
-     * @param i_heightLeft water height on the left side of the dam.
-     * @param i_heightRight water height on the right side of the dam.
-     * @param i_locationDam location (x-coordinate) of the dam.
+     * @param i_height water height wich is the same on both sides.
+     * @param i_momentum water momentum which is the same on both sides.
+     * @param i_midPos the middle position where both waves collide/separate.
      **/
-    ShockShock1d( t_real i_heightLeft,
-               	t_real i_heightRight,
-               	t_real i_locationDam );
+    ShockShock1d( t_real i_height,
+               	t_real i_momentum,
+               	t_real i_midPos );
 
     /**
      * Gets the water height at a given point.
