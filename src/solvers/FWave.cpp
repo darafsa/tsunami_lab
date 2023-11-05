@@ -23,7 +23,7 @@ void FWave::computeEigenvalues(real in_stateLeft[2], real in_stateRight[2], real
 	real particleVelocityLeft = momentumLeft / heightLeft;
 	real particleVelocityRight = momentumRight / heightRight;
 	
-	real heightRoe = 0.5 * (heightLeft + heightRight);
+	real heightRoe = real(0.5) * (heightLeft + heightRight);
 	real particleVelocityRoe = particleVelocityLeft * sqrtHeightLeft + particleVelocityRight * sqrtHeightRight;
 	particleVelocityRoe /= sqrtHeightLeft + sqrtHeightRight;
 
@@ -47,7 +47,7 @@ void FWave::flux(real state[2], real flux[2]) {
 	real momentum = state[1];
 
 	flux[0] = momentum;
-	flux[1] = (momentum * momentum / height + 0.5f * FWave::const_g * height * height);
+	flux[1] = (momentum * momentum / height + real(0.5) * FWave::const_g * height * height);
 }
 
 void FWave::computeEigencoefficients(real in_stateLeft[2], real in_stateRight[2], real in_invertedEigenmatrix[2][2], real out_eigencoefficients[2]) {
