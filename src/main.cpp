@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <string>
 
 int main(int i_argc, char *i_argv[]) {
   // number of cells in x- and y-direction
@@ -32,9 +33,9 @@ int main(int i_argc, char *i_argv[]) {
   std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
   std::cout << "####################################" << std::endl;
 
-  if (i_argc != 4) {
+  if (i_argc < 4) {
     std::cerr << "invalid number of arguments, usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP" << std::endl;
+    std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP height velocity" << std::endl;
     std::cerr << "where CELLS is the number of cells in x-direction, "
                  "SOLVER the solver type [FWAVE, ROE] and SETUP the setup to "
                  "use [DAMBREAK, RARE, SHOCK]."
@@ -67,12 +68,22 @@ int main(int i_argc, char *i_argv[]) {
   // construct setup
   std::string l_setupArg = i_argv[3];
   tsunami_lab::setups::Setup *l_setup;
+  tsunami_lab::t_real l_height = 10;
+  tsunami_lab::t_real l_momentum = 50;
   if (l_setupArg == "DAMBREAK") {
     l_setup = new tsunami_lab::setups::DamBreak1d(10, 5, 5);
   } else if (l_setupArg == "RARE") {
-    l_setup = new tsunami_lab::setups::RareRare1d(10, 5, 5);
+	 if (i_argc > 4) {
+		l_height = std::stof(i_argv[4]);
+		l_momentum = std::stof(i_argv[5]) * l_height;
+	 }
+    l_setup = new tsunami_lab::setups::RareRare1d(l_height, l_momentum, 5);
   } else if (l_setupArg == "SHOCK") {
-    l_setup = new tsunami_lab::setups::ShockShock1d(10, 5, 5);
+	 if (i_argc > 4) {
+		l_height = std::stof(i_argv[4]);
+		l_momentum = std::stof(i_argv[5]) * l_height;
+	 }
+    l_setup = new tsunami_lab::setups::ShockShock1d(l_height, l_momentum, 5);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK"
               << std::endl;
