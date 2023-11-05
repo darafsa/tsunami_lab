@@ -4,7 +4,7 @@
    :maxdepth: 2
    
    self
-   Riemann-Solver.rst
-   FiniteVolumeDiscretization.rst
+   01_RiemannSolver.rst
+   02_FiniteVolumeDiscretization.rst
 
-.. include:: UserDoc.rst
+.. include:: 00_UserDoc.rst

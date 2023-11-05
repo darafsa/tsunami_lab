@@ -1,5 +1,5 @@
-Riemann Solver | Project Report
-===========================================================
+1. Riemann Solver | Project Report
+==================================
 
 Riemann Solver | Roe vs FWave
 -------------------------------
