@@ -9,7 +9,6 @@
 #include "FWave.h"
 
 #include <cmath>
-#include <iostream>
 
 using namespace tsunami_lab::solvers;
 
