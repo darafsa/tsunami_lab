@@ -27,9 +27,6 @@ jobs:
       - name: Dependencies
         run: |
           pip install sphinx sphinx_rtd_theme myst_parser
-          sudo apt install python3-pip
-          sudo pip3 install sphinx-rtd-theme
-          sudo pip3 install sphinxtogithub
 
       - name: Build
         run: |
