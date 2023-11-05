@@ -24,7 +24,7 @@ jobs:
 
       - name: Dependencies
         run: |
-          pip install sphinx sphinx_rtd_theme myst_parser
+          pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-video
 
       - name: Build
         run: |
