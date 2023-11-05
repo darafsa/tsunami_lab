@@ -5,7 +5,7 @@ scons -Q debug=0
 cd "build"
 
 ./tests
-./tsunami_lab 10
+./tsunami_lab 10 FWAVE
 
 cd "/mnt/c/Programming/Git Projects/tsunami_lab"
 
