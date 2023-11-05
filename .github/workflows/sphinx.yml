@@ -22,19 +22,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v3
 
       - name: Dependencies
         run: |
-          sudo apt-get install python3-sphinx
+          pip install sphinx sphinx_rtd_theme myst_parser
           sudo apt install python3-pip
           sudo pip3 install sphinx-rtd-theme
+          sudo pip3 install sphinxtogithub
 
       - name: Build
         run: |
-          cd Sphinx
-          sphinx-build -M html source build
+          sphinx-build doc _build
       
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          folder: Sphinx/build/html
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true
