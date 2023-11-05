@@ -1,4 +1,4 @@
-Finite Volume Discretization | Project Report
+2. Finite Volume Discretization | Project Report
 ===========================================================
 
 Integration of Interchangeability of Solver Type
