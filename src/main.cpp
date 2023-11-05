@@ -147,7 +147,6 @@ int main( int   i_argc,
     }
 
     l_waveProp->setGhostOutflow();
-	 std::string solver = "FWave";
     l_waveProp->timeStep( l_scaling, l_solverType );
 
     l_timeStep++;
