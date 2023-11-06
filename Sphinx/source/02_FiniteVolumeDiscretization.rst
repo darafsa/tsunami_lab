@@ -267,14 +267,14 @@ Observation of the influence of initial parameters on shock-shock/rare-rare prob
 The higher the momentum :math:`u_l`, the higher the middlestate height.
 The higher the height :math:`h_l`, the higher the middlestate height and wavespeeds.
 
-.. video:: _static/animations/02/rare_10_5_70.mp4
+.. video:: _static/rare_10_5_70.mp4
 	 :autoplay:
 	 :nocontrols:
 	 :loop:
 	 :height: 300
 	 :width: 650
 
-.. video:: _static/animations/02/rare_10_10_70.mp4
+.. video:: _static/rare_10_10_70.mp4
 	 :autoplay:
 	 :nocontrols:
 	 :loop:
