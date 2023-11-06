@@ -1,4 +1,4 @@
-0. Tsunami Projekt: User Documentation
+Tsunami Projekt: User Documentation
 ======================================
 
 Installing and Running
