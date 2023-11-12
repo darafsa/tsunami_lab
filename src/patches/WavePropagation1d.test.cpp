@@ -78,11 +78,11 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
   /*
    * @brief test state from middle_states.csv (Shock-Shock Problem)
    *
-   * h_l = 3042.136044684769
-   * h_r = 3042.136044684769
-   * hu_l = -27.52440428024561
-   * hu_r = 27.52440428024561
-   * h* = 3041.976718035753
+   * h_l = 8899.326826472694
+   * h_r = 8899.326826472694
+   * hu_l = 122.0337839252433
+   * hu_r = -122.0337839252433
+   * h* = 8899.739847378269
    */
 
   // construct solver and setup a Shock-Shock problem
@@ -92,41 +92,45 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
   {
     m_waveProp.setHeight( l_ce,
                           0,
-                          3042.136044684769);
+                          8899.326826472694 );
     m_waveProp.setMomentumX( l_ce,
                              0,
-                             -27.52440428024561);
+                             122.0337839252433 );
   }
   for (std::size_t l_ce = 50; l_ce < 100; l_ce++)
   {
     m_waveProp.setHeight( l_ce,
                           0,
-                          3042.136044684769);
+                          8899.326826472694 );
     m_waveProp.setMomentumX( l_ce,
                              0,
-                             27.52440428024561);
+                             -122.0337839252433 );
   }
 
   // set outflow boundary condition
   m_waveProp.setGhostOutflow();
 
   // perform a time step
-  m_waveProp.timeStep( 0.1, tsunami_lab::patches::WavePropagation::FWave );
+  for (int i = 0; i < 50; i++) {
+		m_waveProp.setGhostOutflow();
+		m_waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
+  }
 
   // test for h*
-  REQUIRE( m_waveProp.getHeight()[50]   == Approx(3041.976718035753) );
+  REQUIRE( m_waveProp.getHeight()[49]   == Approx(8899.739847378269) );
+  REQUIRE( m_waveProp.getHeight()[50]   == Approx(8899.739847378269) );
 }
 
 TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[WaveProp1dFWaveRareRare]")
 {
-  /**
+  /*
    * @brief test state from middle_states.csv (Rare-Rare Problem)
    *
-   * h_l = 7589.71304876485
-   * h_r = 7589.71304876485
-   * hu_l = -138.9853242339589
-   * hu_r = 138.9853242339589
-   * h* = 7589.203700916305
+   * h_l = 9976.904476606509
+   * h_r = 9976.904476606509
+   * hu_l = -906.6229611756387
+   * hu_r = 906.6229611756387
+   * h* = 9974.006714260977
    */
 
   // construct solver and setup a Rare-Rare problem
@@ -134,29 +138,33 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
 
   for (std::size_t l_ce = 0; l_ce < 50; l_ce++)
   {
-    m_waveProp.setHeight(l_ce,
-                         0,
-                         7589.71304876485);
-    m_waveProp.setMomentumX(l_ce,
-                            0,
-                            -138.9853242339589);
+    m_waveProp.setHeight( l_ce,
+                          0,
+                          9976.904476606509 );
+    m_waveProp.setMomentumX( l_ce,
+                             0,
+                             -906.6229611756387 );
   }
   for (std::size_t l_ce = 50; l_ce < 100; l_ce++)
   {
-    m_waveProp.setHeight(l_ce,
-                         0,
-                         7589.71304876485);
-    m_waveProp.setMomentumX(l_ce,
-                            0,
-                            138.9853242339589);
+    m_waveProp.setHeight( l_ce,
+                          0,
+                          9976.904476606509 );
+    m_waveProp.setMomentumX( l_ce,
+                             0,
+                             906.6229611756387 );
   }
 
   // set outflow boundary condition
   m_waveProp.setGhostOutflow();
 
   // perform a time step
-  m_waveProp.timeStep( 0.1, tsunami_lab::patches::WavePropagation::FWave );
+  for (int i = 0; i < 50; i++) {
+		m_waveProp.setGhostOutflow();
+		m_waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
+  }
 
   // test for h*
-  REQUIRE(m_waveProp.getHeight()[50] == Approx(7589.203700916305));
+  REQUIRE( m_waveProp.getHeight()[49] == Approx(9974.006714260977) );
+  REQUIRE( m_waveProp.getHeight()[50] == Approx(9974.006714260977) );
 }
