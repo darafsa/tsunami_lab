@@ -103,9 +103,9 @@ void WavePropagation1d::setGhostOutflow( Boundary boundary[2] ) {
 	 momentumLocal[0] = momentumLocal[1];
 	 bathymetryLocal[0] = bathymetryLocal[1];
   } else if (boundary[1] == REFLECTING) {
-	 heightLocal[0] = heightLocal[1];
-	 momentumLocal[0] = -momentumLocal[1];
-	 bathymetryLocal[0] = bathymetryLocal[1];
+	 heightLocal[0] = 0;
+	 momentumLocal[0] = 0;
+	 bathymetryLocal[0] = heightLocal[1]+1;
   }
 
   // set right boundary
@@ -114,8 +114,8 @@ void WavePropagation1d::setGhostOutflow( Boundary boundary[2] ) {
 	 momentumLocal[cellCount+1] = momentumLocal[cellCount];
 	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount];
   } else if(boundary[1] == REFLECTING) {
-	 heightLocal[cellCount+1] = heightLocal[cellCount];
-	 momentumLocal[cellCount+1] = -momentumLocal[cellCount];
-	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount];
+	 heightLocal[cellCount+1] = 0;
+	 momentumLocal[cellCount+1] = 0;
+	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount]+1;
   }
 }
