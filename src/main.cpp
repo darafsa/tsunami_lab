@@ -10,6 +10,7 @@
 #include "setups/RareRare1d/RareRare1d.h"
 #include "setups/ShockShock1d/ShockShock1d.h"
 #include "setups/Bathymetry1d/Bathymetry1d.h"
+#include "setups/ShockShockReflective1d/ShockShockReflective1d.h"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -26,7 +27,7 @@ int main(int in_argc, char *in_argv[]) {
   tsunami_lab::real cellSize = 1;
 
   // solver type
-  tsunami_lab::patches::WavePropagation1d::Solver solverType;
+  tsunami_lab::Solver solverType;
 
   std::cout << "####################################" << std::endl;
   std::cout << "### Tsunami Lab                  ###" << std::endl;
@@ -34,12 +35,13 @@ int main(int in_argc, char *in_argv[]) {
   std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
   std::cout << "####################################" << std::endl;
 
-  if (in_argc < 4) {
+  if (in_argc < 6) {
     std::cerr << "invalid number of arguments, usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP height velocity" << std::endl;
+    std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP BOUNDARYLEFT BOUNDARYRIGHT height velocity" << std::endl;
     std::cerr << "where CELLS is the number of cells in x-direction, "
-                 "SOLVER the solver type [FWAVE, ROE] and SETUP the setup to "
-                 "use [DAMBREAK, RARE, SHOCK]."
+                 "SOLVER the solver type [FWAVE, ROE], "
+					  "SETUP the setup to use [DAMBREAK, RARE, SHOCK, BATHYMETRY, SHOCKREFLECT] and "
+					  "BOUNDARY[LEFT/RIGT] the boundary condition to use [OUTFLOW, REFLECTING]."
               << std::endl;
     return EXIT_FAILURE;
   } else {
@@ -52,9 +54,9 @@ int main(int in_argc, char *in_argv[]) {
 
     std::string solverArg = in_argv[2];
     if (solverArg == "FWAVE") {
-      solverType = tsunami_lab::patches::WavePropagation::FWave;
+      solverType = tsunami_lab::FWAVE;
     } else if (solverArg == "ROE") {
-      solverType = tsunami_lab::patches::WavePropagation::Roe;
+      solverType = tsunami_lab::ROE;
     } else {
       std::cerr << "invalid solver type. Please use either ROE or FWAVE"
                 << std::endl;
@@ -66,27 +68,49 @@ int main(int in_argc, char *in_argv[]) {
   std::cout << "  number of cells in y-direction: " << yCount << std::endl;
   std::cout << "  cell size:                      " << cellSize << std::endl;
 
+	
+  // boundary conditions
+  std::string boundaryLeftArg = in_argv[4];
+  std::string boundaryRightArg = in_argv[5];
+  tsunami_lab::Boundary boundary[2];
+  if (boundaryLeftArg == "OUTFLOW") {
+	 boundary[0] = tsunami_lab::OUTFLOW;
+  } else if (boundaryLeftArg == "REFLECTING") {
+	 boundary[0] = tsunami_lab::REFLECTING;
+  } else {
+	 std::cerr << "invalid boundary type for Left side. Please use either OUTFLOW or REFLECTING"
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (boundaryRightArg == "OUTFLOW") {
+	 boundary[1] = tsunami_lab::OUTFLOW;
+  } else if (boundaryRightArg == "REFLECTING") {
+	 boundary[1] = tsunami_lab::REFLECTING;
+  } else {
+	 std::cerr << "invalid boundary type for Right side. Please use either OUTFLOW or REFLECTING"
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+
   // construct setup
   std::string setupArg = in_argv[3];
   tsunami_lab::setups::Setup *setup;
   tsunami_lab::real height = 10;
   tsunami_lab::real momentum = 50;
+  if (in_argc > 5) {
+		height = std::stof(in_argv[6]);
+		momentum = std::stof(in_argv[7]) * height;
+	 }
   if (setupArg == "DAMBREAK") {
     setup = new tsunami_lab::setups::DamBreak1d(10, 5, 5);
   } else if (setupArg == "RARE") {
-	 if (in_argc > 4) {
-		height = std::stof(in_argv[4]);
-		momentum = std::stof(in_argv[5]) * height;
-	 }
     setup = new tsunami_lab::setups::RareRare1d(height, momentum, 5);
   } else if (setupArg == "SHOCK") {
-	 if (in_argc > 4) {
-		height = std::stof(in_argv[4]);
-		momentum = std::stof(in_argv[5]) * height;
-	 }
     setup = new tsunami_lab::setups::ShockShock1d(height, momentum, 5);
   } else if(setupArg == "BATHYMETRY") {
 	 setup = new tsunami_lab::setups::Bathymetry1d(10, 5, 5);
+  } else if(setupArg == "SHOCKREFLECT") {
+	 setup = new tsunami_lab::setups::ShockShockReflective1d(height, momentum, 5);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK"
               << std::endl;
@@ -139,7 +163,7 @@ int main(int in_argc, char *in_argv[]) {
   // set up time and print control
   tsunami_lab::idx timeStep = 0;
   tsunami_lab::idx nOut = 0;
-  tsunami_lab::real endTime = 3;
+  tsunami_lab::real endTime = 1.25;
   tsunami_lab::real simTime = 0;
 
   std::cout << "entering time loop" << std::endl;
@@ -167,10 +191,6 @@ int main(int in_argc, char *in_argv[]) {
       file.close();
       nOut++;
     }
-
-	 tsunami_lab::patches::WavePropagation::Boundary boundary[2] = {
-		tsunami_lab::patches::WavePropagation::Outflow, 
-		tsunami_lab::patches::WavePropagation::Outflow };
     waveProp->setGhostOutflow(boundary);
     waveProp->timeStep(scaling, solverType);
 

@@ -19,8 +19,6 @@ namespace tsunami_lab {
 
 class tsunami_lab::patches::WavePropagation {
   public:
-	 enum Solver { Roe, FWave };
-	 enum Boundary { Outflow, Reflective };
     /**
      * @brief Virtual destructor for base class.
      **/

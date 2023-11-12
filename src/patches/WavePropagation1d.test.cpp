@@ -54,13 +54,13 @@ TEST_CASE( "Test the 1d wave propagation solver.", "[WaveProp1d]" ) {
   }
 
   // set outflow boundary condition
-  tsunami_lab::patches::WavePropagation::Boundary boundary[2] = {
-		tsunami_lab::patches::WavePropagation::Outflow, 
-		tsunami_lab::patches::WavePropagation::Outflow };
+  tsunami_lab::Boundary boundary[2] = {
+		tsunami_lab::OUTFLOW, 
+		tsunami_lab::OUTFLOW };
   waveProp.setGhostOutflow( boundary );
 
   // perform a time step
-  waveProp.timeStep( 0.1, tsunami_lab::patches::WavePropagation::FWave );
+  waveProp.timeStep( 0.1, tsunami_lab::FWAVE );
 
   // steady state
   for( std::size_t cell = 0; cell < 49; cell++ ) {
@@ -123,15 +123,15 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
   }
 
   // set outflow boundary condition
-  tsunami_lab::patches::WavePropagation::Boundary boundary[2] = {
-		tsunami_lab::patches::WavePropagation::Outflow, 
-		tsunami_lab::patches::WavePropagation::Outflow };
+  tsunami_lab::Boundary boundary[2] = {
+		tsunami_lab::OUTFLOW, 
+		tsunami_lab::OUTFLOW };
   waveProp.setGhostOutflow( boundary );
 
   // perform a time step
   for (int i = 0; i < 50; i++) {
 		waveProp.setGhostOutflow( boundary );
-		waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
+		waveProp.timeStep(0.001, tsunami_lab::FWAVE );
   }
 
   // test for h*
@@ -180,15 +180,15 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
   }
 
   // set outflow boundary condition
-  tsunami_lab::patches::WavePropagation::Boundary boundary[2] = {
-		tsunami_lab::patches::WavePropagation::Outflow, 
-		tsunami_lab::patches::WavePropagation::Outflow };
+  tsunami_lab::Boundary boundary[2] = {
+		tsunami_lab::OUTFLOW, 
+		tsunami_lab::OUTFLOW };
   waveProp.setGhostOutflow( boundary );
 
   // perform a time step
   for (int i = 0; i < 50; i++) {
 		waveProp.setGhostOutflow( boundary );
-		waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
+		waveProp.timeStep(0.001, tsunami_lab::FWAVE );
   }
 
   // test for h*

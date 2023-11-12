@@ -17,6 +17,9 @@ namespace tsunami_lab {
   //! floating point type
   typedef float t_real;
   typedef t_real real;
+
+  enum Solver { ROE, FWAVE };
+  enum Boundary { OUTFLOW, REFLECTING };
 }
 
 #endif
