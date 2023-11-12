@@ -91,28 +91,28 @@ void WavePropagation1d::timeStep( real in_scaling, Solver in_solver ) {
   }
 }
 
-void WavePropagation1d::setGhostOutflow(Boundary boundary) {
+void WavePropagation1d::setGhostOutflow(Boundary boundary[2]) {
   real * heightLocal = height[step];
   real * momentumLocal = momentum[step];
   real * bathymetryLocal = bathymetry;
 
-  if(boundary == Open) {
-	 // set left boundary
+  // set left boundary
+  if(boundary[0] == Outflow) {
 	 heightLocal[0] = heightLocal[1];
 	 momentumLocal[0] = momentumLocal[1];
 	 bathymetryLocal[0] = bathymetryLocal[1];
-
-	 // set right boundary
-	 heightLocal[cellCount+1] = heightLocal[cellCount];
-	 momentumLocal[cellCount+1] = momentumLocal[cellCount];
-	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount];
-  } else if(boundary == Reflective) {
-	 // set left boundary
+  } else if (boundary[1] == Reflective) {
 	 heightLocal[0] = 0;
 	 momentumLocal[0] = 0;
 	 bathymetryLocal[0] = heightLocal[1]+1;
+  }
 
-	 // set right boundary
+  // set right boundary
+  if(boundary[1] == Outflow) {
+	 heightLocal[cellCount+1] = heightLocal[cellCount];
+	 momentumLocal[cellCount+1] = momentumLocal[cellCount];
+	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount];
+  } else if(boundary[1] == Reflective) {
 	 heightLocal[cellCount+1] = 0;
 	 momentumLocal[cellCount+1] = 0;
 	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount]+1;

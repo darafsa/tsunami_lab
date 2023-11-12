@@ -20,7 +20,7 @@ namespace tsunami_lab {
 class tsunami_lab::patches::WavePropagation {
   public:
 	 enum Solver { Roe, FWave };
-	 enum Boundary { Open, Reflective };
+	 enum Boundary { Outflow, Reflective };
     /**
      * @brief Virtual destructor for base class.
      **/
@@ -36,9 +36,9 @@ class tsunami_lab::patches::WavePropagation {
 	 /**
 	  * @brief Sets the values of the ghost cells according to outflow boundary conditions.
 	  * 
-	  * @param in_boundary boundary type to use (open/reflective)
+	  * @param in_boundary boundary type to use (outflow/reflective); 0: boundary left side, 1: boundary right side.
 	  */
-    virtual void setGhostOutflow(Boundary in_boundary) = 0;
+    virtual void setGhostOutflow(Boundary in_boundary[2]) = 0;
 
     /**
      * @brief Gets the stride in y-direction. x-direction is stride-1.

@@ -168,7 +168,10 @@ int main(int in_argc, char *in_argv[]) {
       nOut++;
     }
 
-    waveProp->setGhostOutflow(tsunami_lab::patches::WavePropagation::Open);
+	 tsunami_lab::patches::WavePropagation::Boundary boundary[2] = {
+		tsunami_lab::patches::WavePropagation::Outflow, 
+		tsunami_lab::patches::WavePropagation::Outflow };
+    waveProp->setGhostOutflow(boundary);
     waveProp->timeStep(scaling, solverType);
 
     timeStep++;

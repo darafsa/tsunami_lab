@@ -58,9 +58,9 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     /**
 	  * @brief Sets the values of the ghost cells according to outflow boundary conditions.
 	  * 
-	  * @param in_boundary boundary type to use (open/reflective)
+	  * @param in_boundary boundary type to use (outflow/reflective); 0: boundary left side, 1: boundary right side.
 	  */
-    void setGhostOutflow(Boundary in_boundary);
+    void setGhostOutflow(Boundary in_boundary[2]);
 
     /**
      * @brief Gets the stride in y-direction. x-direction is stride-1.
