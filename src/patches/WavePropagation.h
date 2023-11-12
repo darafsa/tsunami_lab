@@ -1,5 +1,7 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Marek Sommerfeld (marek.sommerfeld AT uni-jena.de)
+ * @author Moritz Rätz (moritz.raetz AT uni-jena.de)
  *
  * @section DESCRIPTION
  * Base class of the wave propagation patches.
@@ -18,53 +20,56 @@ namespace tsunami_lab {
 class tsunami_lab::patches::WavePropagation {
   public:
 	 enum Solver { Roe, FWave };
+	 enum Boundary { Open, Reflective };
     /**
-     * Virtual destructor for base class.
+     * @brief Virtual destructor for base class.
      **/
     virtual ~WavePropagation(){};
 
     /**
-     * Performs a time step.
+     * @brief Performs a time step.
      *
      * @param in_scaling scaling of the time step.
      **/
-    virtual void timeStep( real in_scaling, Solver in_solver ) = 0;
+    virtual void timeStep( real in_scaling, Solver in_solver ) = 0; 
+
+	 /**
+	  * @brief Sets the values of the ghost cells according to outflow boundary conditions.
+	  * 
+	  * @param in_boundary boundary type to use (open/reflective)
+	  */
+    virtual void setGhostOutflow(Boundary in_boundary) = 0;
 
     /**
-     * Sets the values of the ghost cells according to outflow boundary conditions.
-     **/
-    virtual void setGhostOutflow() = 0;
-
-    /**
-     * Gets the stride in y-direction. x-direction is stride-1.
+     * @brief Gets the stride in y-direction. x-direction is stride-1.
      *
      * @return stride in y-direction.
      **/
     virtual idx getStride() = 0;
 
     /**
-     * Gets cells' water heights.
+     * @brief Gets cells' water heights.
      *
      * @return water heights.
      */
     virtual real const * getHeight() = 0;
 
     /**
-     * Gets the cells' momenta in x-direction.
+     * @brief Gets the cells' momenta in x-direction.
      *
      * @return momenta in x-direction.
      **/
     virtual real const * getMomentumX() = 0;
 
     /**
-     * Gets the cells' momenta in y-direction.
+     * @brief Gets the cells' momenta in y-direction.
      *
      * @return momenta in y-direction.
      **/
     virtual real const * getMomentumY() = 0;
 
     /**
-     * Sets the height of the cell to the given value.
+     * @brief Sets the height of the cell to the given value.
      *
      * @param in_x id of the cell in x-direction.
      * @param in_y id of the cell in y-direction.
@@ -75,7 +80,7 @@ class tsunami_lab::patches::WavePropagation {
                             real in_height ) = 0;
 
     /**
-     * Sets the momentum in x-direction to the given value.
+     * @brief Sets the momentum in x-direction to the given value.
      *
      * @param in_x id of the cell in x-direction.
      * @param in_y id of the cell in y-direction.
@@ -86,7 +91,7 @@ class tsunami_lab::patches::WavePropagation {
                                real in_momentum ) = 0;
 
     /**
-     * Sets the momentum in y-direction to the given value.
+     * @brief Sets the momentum in y-direction to the given value.
      *
      * @param in_x id of the cell in x-direction.
      * @param in_y id of the cell in y-direction.
@@ -95,6 +100,17 @@ class tsunami_lab::patches::WavePropagation {
     virtual void setMomentumY( idx  in_x,
                                idx  in_y,
                                real in_momentumVertical ) = 0;
+
+	 /**
+	  * @brief Sets the bathymetry to the given value.
+	  * 
+	  * @param in_x id of the cell in x-direction.
+     * @param in_y id of the cell in y-direction.
+     * @param in_bathymetry bathymetry.
+	  **/
+	 virtual void setBathymetry( idx in_x,
+	 									  idx in_y,
+										  real in_bathymetry ) = 0;
 };
 
 #endif

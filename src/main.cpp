@@ -6,9 +6,9 @@
  **/
 #include "io/Csv.h"
 #include "patches/WavePropagation1d.h"
-#include "setups/DamBreak1d.h"
-#include "setups/RareRare1d.h"
-#include "setups/ShockShock1d.h"
+#include "setups/DamBreak1d/DamBreak1d.h"
+#include "setups/RareRare1d/RareRare1d.h"
+#include "setups/ShockShock1d/ShockShock1d.h"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -111,6 +111,7 @@ int main(int in_argc, char *in_argv[]) {
 
       tsunami_lab::real momentumX = setup->getMomentumX(x, y);
       tsunami_lab::real momentumY = setup->getMomentumY(x, y);
+      tsunami_lab::real bathymetry = setup->getBathymetry(x, y);
 
       // set initial values in wave propagation solver
       waveProp->setHeight(cellX, cellY, height);
@@ -118,6 +119,8 @@ int main(int in_argc, char *in_argv[]) {
       waveProp->setMomentumX(cellX, cellY, momentumX);
 
       waveProp->setMomentumY(cellX, cellY, momentumY);
+
+      waveProp->setBathymetry(cellX, cellY, bathymetry);
     }
   }
 
@@ -156,7 +159,7 @@ int main(int in_argc, char *in_argv[]) {
       nOut++;
     }
 
-    waveProp->setGhostOutflow();
+    waveProp->setGhostOutflow(tsunami_lab::patches::WavePropagation::Open);
     waveProp->timeStep(scaling, solverType);
 
     timeStep++;

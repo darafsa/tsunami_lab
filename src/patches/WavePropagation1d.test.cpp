@@ -40,15 +40,15 @@ TEST_CASE( "Test the 1d wave propagation solver.", "[WaveProp1d]" ) {
   }
   for( std::size_t cell = 50; cell < 100; cell++ ) {
     waveProp.setHeight( cell,
-                          0,
-                          8 );
+                        0,
+                        8 );
     waveProp.setMomentumX( cell,
-                             0,
-                             0 );
+                           0,
+                           0 );
   }
 
   // set outflow boundary condition
-  waveProp.setGhostOutflow();
+  waveProp.setGhostOutflow( tsunami_lab::patches::WavePropagation::Open );
 
   // perform a time step
   waveProp.timeStep( 0.1, tsunami_lab::patches::WavePropagation::FWave );
@@ -91,11 +91,11 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
   for (std::size_t cell = 0; cell < 50; cell++)
   {
     waveProp.setHeight( cell,
-                          0,
-                          8899.326826472694 );
+                        0,
+                        8899.326826472694 );
     waveProp.setMomentumX( cell,
-                             0,
-                             122.0337839252433 );
+                           0,
+                           122.0337839252433 );
   }
   for (std::size_t cell = 50; cell < 100; cell++)
   {
@@ -103,16 +103,16 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
                           0,
                           8899.326826472694 );
     waveProp.setMomentumX( cell,
-                             0,
-                             -122.0337839252433 );
+                           0,
+                           -122.0337839252433 );
   }
 
   // set outflow boundary condition
-  waveProp.setGhostOutflow();
+  waveProp.setGhostOutflow( tsunami_lab::patches::WavePropagation::Open );
 
   // perform a time step
   for (int i = 0; i < 50; i++) {
-		waveProp.setGhostOutflow();
+		waveProp.setGhostOutflow( tsunami_lab::patches::WavePropagation::Open );
 		waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
   }
 
@@ -156,11 +156,11 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
   }
 
   // set outflow boundary condition
-  waveProp.setGhostOutflow();
+  waveProp.setGhostOutflow( tsunami_lab::patches::WavePropagation::Open );
 
   // perform a time step
   for (int i = 0; i < 50; i++) {
-		waveProp.setGhostOutflow();
+		waveProp.setGhostOutflow( tsunami_lab::patches::WavePropagation::Open );
 		waveProp.timeStep(0.001, tsunami_lab::patches::WavePropagation::FWave );
   }
 

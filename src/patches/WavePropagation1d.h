@@ -1,5 +1,7 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Marek Sommerfeld (marek.sommerfeld AT uni-jena.de)
+ * @author Moritz Rätz (moritz.raetz AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional wave propagation patch.
@@ -29,21 +31,24 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     //! momenta for the current and next time step for all cells
     real * momentum[2] = { nullptr, nullptr };
 
+    //! bathymetry for all cells
+    real * bathymetry = nullptr;
+
   public:
     /**
-     * Constructs the 1d wave propagation solver.
+     * @brief Constructs the 1d wave propagation solver.
      *
      * @param in_cellCount number of cells.
      **/
     WavePropagation1d( idx in_cellCount );
 
     /**
-     * Destructor which frees all allocated memory.
+     * @brief Destructor which frees all allocated memory.
      **/
     ~WavePropagation1d();
 
     /**
-     * Performs a time step.
+     * @brief Performs a time step.
      *
      * @param in_scaling scaling of the time step (dt / dx).
 	  * @param in_solver solver type to use (Roe / FWave)
@@ -51,12 +56,14 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     void timeStep( real in_scaling, Solver in_solver );
 
     /**
-     * Sets the values of the ghost cells according to outflow boundary conditions.
-     **/
-    void setGhostOutflow();
+	  * @brief Sets the values of the ghost cells according to outflow boundary conditions.
+	  * 
+	  * @param in_boundary boundary type to use (open/reflective)
+	  */
+    void setGhostOutflow(Boundary in_boundary);
 
     /**
-     * Gets the stride in y-direction. x-direction is stride-1.
+     * @brief Gets the stride in y-direction. x-direction is stride-1.
      *
      * @return stride in y-direction.
      **/
@@ -65,7 +72,7 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     }
 
     /**
-     * Gets cells' water heights.
+     * @brief Gets cells' water heights.
      *
      * @return water heights.
      */
@@ -74,7 +81,7 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     }
 
     /**
-     * Gets the cells' momenta in x-direction.
+     * @brief Gets the cells' momenta in x-direction.
      *
      * @return momenta in x-direction.
      **/
@@ -83,14 +90,14 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     }
 
     /**
-     * Dummy function which returns a nullptr.
+     * @brief Dummy function which returns a nullptr.
      **/
     real const * getMomentumY(){
       return nullptr;
     }
 
     /**
-     * Sets the height of the cell to the given value.
+     * @brief Sets the height of the cell to the given value.
      *
      * @param in_x id of the cell in x-direction.
      * @param in_height water height.
@@ -102,7 +109,7 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     }
 
     /**
-     * Sets the momentum in x-direction to the given value.
+     * @brief Sets the momentum in x-direction to the given value.
      *
      * @param in_x id of the cell in x-direction.
      * @param in_momentumHorizontal momentum in x-direction.
@@ -114,11 +121,23 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     }
 
     /**
-     * Dummy function since there is no y-momentum in the 1d solver.
+     * @brief Dummy function since there is no y-momentum in the 1d solver.
      **/
     void setMomentumY( idx,
                        idx,
                        real ) {};
+	
+	 /**
+	  * @brief Sets the bathymetry to the given value.
+	  * 
+	  * @param in_x id of the cell in x-direction.
+     * @param in_bathymetry bathymetry.
+	  **/
+	 void setBathymetry( idx in_x,
+	 							idx,
+	 							real in_bathymetry ) {
+		bathymetry[in_x] = in_bathymetry;
+	};
 };
 
 #endif

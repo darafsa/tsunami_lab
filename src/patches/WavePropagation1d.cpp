@@ -1,5 +1,7 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Marek Sommerfeld (marek.sommerfeld AT uni-jena.de)
+ * @author Moritz Rätz (moritz.raetz AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional wave propagation patch.
@@ -14,16 +16,20 @@ WavePropagation1d::WavePropagation1d( idx in_cellCount ) {
   cellCount = in_cellCount;
 
   // allocate memory including a single ghost cell on each side
-  for( unsigned short i = 0; i < 2; i++ ) {
-    height[i] = new real[ cellCount + 2 ];
-    momentum[i] = new real[ cellCount + 2 ];
+  for( unsigned short step = 0; step < 2; step++ ) {
+    height[step] = new real[ cellCount + 2 ];
+    momentum[step] = new real[ cellCount + 2 ];
   }
+  bathymetry = new real[ cellCount + 2 ];
 
   // init to zero
-  for( unsigned short i = 0; i < 2; i++ ) {
+  for( unsigned short step = 0; step < 2; step++ ) {
     for( idx cell = 0; cell < cellCount; cell++ ) {
-      height[i][cell] = 0;
-      momentum[i][cell] = 0;
+      height[step][cell] = 0;
+      momentum[step][cell] = 0;
+		if(step == 0) {
+			bathymetry[cell] = 0;
+		}
     }
   }
 }
@@ -59,8 +65,8 @@ void WavePropagation1d::timeStep( real in_scaling, Solver in_solver ) {
     // compute net-updates
     real netUpdates[2][2];
 	 
-	 real stateLeft[3] = {heightOld[cellLeft], momentumOld[cellLeft], 0};
-	 real stateRight[3] = {heightOld[cellRight], momentumOld[cellRight], 0};
+	 real stateLeft[3] = { heightOld[cellLeft], momentumOld[cellLeft], bathymetry[cellLeft] };
+	 real stateRight[3] = { heightOld[cellRight], momentumOld[cellRight], bathymetry[cellRight] };
 
 	 if ( in_solver == FWave ) {
 		solvers::FWave::netUpdates( stateLeft, 
@@ -85,15 +91,30 @@ void WavePropagation1d::timeStep( real in_scaling, Solver in_solver ) {
   }
 }
 
-void WavePropagation1d::setGhostOutflow() {
+void WavePropagation1d::setGhostOutflow(Boundary boundary) {
   real * heightLocal = height[step];
   real * momentumLocal = momentum[step];
+  real * bathymetryLocal = bathymetry;
 
-  // set left boundary
-  heightLocal[0] = heightLocal[1];
-  momentumLocal[0] = momentumLocal[1];
+  if(boundary == Open) {
+	 // set left boundary
+	 heightLocal[0] = heightLocal[1];
+	 momentumLocal[0] = momentumLocal[1];
+	 bathymetryLocal[0] = bathymetryLocal[1];
 
-  // set right boundary
-  heightLocal[cellCount+1] = heightLocal[cellCount];
-  momentumLocal[cellCount+1] = momentumLocal[cellCount];
+	 // set right boundary
+	 heightLocal[cellCount+1] = heightLocal[cellCount];
+	 momentumLocal[cellCount+1] = momentumLocal[cellCount];
+	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount];
+  } else if(boundary == Reflective) {
+	 // set left boundary
+	 heightLocal[0] = 0;
+	 momentumLocal[0] = 0;
+	 bathymetryLocal[0] = heightLocal[1]+1;
+
+	 // set right boundary
+	 heightLocal[cellCount+1] = 0;
+	 momentumLocal[cellCount+1] = 0;
+	 bathymetryLocal[cellCount+1] = bathymetryLocal[cellCount]+1;
+  }
 }

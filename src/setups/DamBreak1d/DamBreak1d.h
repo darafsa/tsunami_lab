@@ -7,7 +7,7 @@
 #ifndef TSUNAMI_LAB_SETUPS_DAM_BREAK_1D_H
 #define TSUNAMI_LAB_SETUPS_DAM_BREAK_1D_H
 
-#include "Setup.h"
+#include "../Setup.h"
 
 namespace tsunami_lab {
   namespace setups {
@@ -16,7 +16,7 @@ namespace tsunami_lab {
 }
 
 /**
- * 1d dam break setup.
+ * @brief 1d dam break setup.
  **/
 class tsunami_lab::setups::DamBreak1d: public Setup {
   private:
@@ -31,7 +31,7 @@ class tsunami_lab::setups::DamBreak1d: public Setup {
 
   public:
     /**
-     * Constructor.
+     * @brief Constructor.
      *
      * @param i_heightLeft water height on the left side of the dam.
      * @param i_heightRight water height on the right side of the dam.
@@ -42,7 +42,7 @@ class tsunami_lab::setups::DamBreak1d: public Setup {
                 t_real i_locationDam );
 
     /**
-     * Gets the water height at a given point.
+     * @brief Gets the water height at a given point.
      *
      * @param i_x x-coordinate of the queried point.
      * @return height at the given point.
@@ -51,7 +51,7 @@ class tsunami_lab::setups::DamBreak1d: public Setup {
                       t_real      ) const;
 
     /**
-     * Gets the momentum in x-direction.
+     * @brief Gets the momentum in x-direction.
      *
      * @return momentum in x-direction.
      **/
@@ -59,12 +59,22 @@ class tsunami_lab::setups::DamBreak1d: public Setup {
                          t_real ) const;
 
     /**
-     * Gets the momentum in y-direction.
+     * @brief Gets the momentum in y-direction.
      *
      * @return momentum in y-direction.
      **/
     t_real getMomentumY( t_real,
                          t_real ) const;
+
+	 /**
+     * @brief Gets the bathymetry at a given point.
+     *
+     * @param i_x x-coordinate of the queried point.
+     * @param i_y y-coordinate of the queried point.
+     * @return bathymetry.
+     **/
+    t_real getBathymetry( t_real,
+                          t_real ) const;
 
 };
 

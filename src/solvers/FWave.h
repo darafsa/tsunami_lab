@@ -48,7 +48,7 @@ class tsunami_lab::solvers::FWave {
 		 * @param in_stateRight state of the right side; 0: height, 1: momentum, 2: bathymetry.
 		 * @param out_dxPsi will be set to the dxPsi function; -g*(bathymetryRight-bathymetryLeft)*((heightLeft+heightRight) / 2).
 		 */
-		static void computedxPsi( real in_stateLeft[3],
+		static void computeDxPsi( real in_stateLeft[3],
 										  real in_stateRight[3],
 										  real & out_dxPsi);
 

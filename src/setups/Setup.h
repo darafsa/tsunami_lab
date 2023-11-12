@@ -16,17 +16,17 @@ namespace tsunami_lab {
 }
 
 /**
- * Base setup.
+ * @brief Base setup.
  **/
 class tsunami_lab::setups::Setup {
   public:
     /**
-     * Virtual destructor for base class.
+     * @brief Virtual destructor for base class.
      **/
     virtual ~Setup(){};
 
     /**
-     * Gets the water height at a given point.
+     * @brief Gets the water height at a given point.
      *
      * @param i_x x-coordinate of the queried point.
      * @param i_y y-coordinate of the queried point.
@@ -36,7 +36,7 @@ class tsunami_lab::setups::Setup {
                               t_real i_y ) const = 0;
 
     /**
-     * Gets the momentum in x-direction.
+     * @brief Gets the momentum in x-direction.
      *
      * @param i_x x-coordinate of the queried point.
      * @param i_y y-coordinate of the queried point.
@@ -46,7 +46,7 @@ class tsunami_lab::setups::Setup {
                                  t_real i_y ) const = 0;
 
     /**
-     * Gets the momentum in y-direction.
+     * @brief Gets the momentum in y-direction.
      *
      * @param i_x x-coordinate of the queried point.
      * @param i_y y-coordinate of the queried point.
@@ -54,6 +54,16 @@ class tsunami_lab::setups::Setup {
      **/
     virtual t_real getMomentumY( t_real i_x,
                                  t_real i_y ) const = 0;
+
+	 /**
+     * @brief Gets the bathymetry at a given point.
+     *
+     * @param i_x x-coordinate of the queried point.
+     * @param i_y y-coordinate of the queried point.
+     * @return bathymetry.
+     **/
+    virtual t_real getBathymetry( t_real i_x,
+                                  t_real i_y ) const = 0;
       
 };
 

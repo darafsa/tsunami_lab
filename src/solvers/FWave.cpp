@@ -50,13 +50,13 @@ void FWave::flux(real in_state[3], real out_flux[2]) {
 	out_flux[1] = (momentum * momentum / height + real(0.5) * const_g * height * height);
 }
 
-void FWave::computedxPsi(real in_stateLeft[3], real in_stateRight[3], real & out_dxPsi) {
+void FWave::computeDxPsi(real in_stateLeft[3], real in_stateRight[3], real & out_dxPsi) {
 	real heightLeft = in_stateLeft[0];
 	real heightRight = in_stateRight[0];
 	real bathymetryLeft = in_stateLeft[2];
 	real bathymetryRight = in_stateRight[2];
 	
-	//			   -g	  *	 bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2
+	//			    -g	  *	 bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2
 	out_dxPsi = (-const_g * (bathymetryRight - bathymetryLeft) * ((heightLeft + heightRight) / 2));
 }
 
@@ -67,7 +67,7 @@ void FWave::computeEigencoefficients(real in_stateLeft[3], real in_stateRight[3]
 
 	flux(in_stateLeft, fluxJumpLeft);
 	flux(in_stateRight, fluxJumpRight);
-	computedxPsi(in_stateLeft, in_stateRight, dxPsi);
+	computeDxPsi(in_stateLeft, in_stateRight, dxPsi);
 	
 	real fluxJump[2] = {
 		fluxJumpRight[0] - fluxJumpLeft[0],
