@@ -16,16 +16,16 @@
 #include <limits>
 #include <string>
 
-int main(int i_argc, char *i_argv[]) {
+int main(int in_argc, char *in_argv[]) {
   // number of cells in x- and y-direction
-  tsunami_lab::t_idx l_nx = 0;
-  tsunami_lab::t_idx l_ny = 1;
+  tsunami_lab::idx xCount = 0;
+  tsunami_lab::idx yCount = 1;
 
   // set cell size
-  tsunami_lab::t_real l_dxy = 1;
+  tsunami_lab::real cellSize = 1;
 
   // solver type
-  tsunami_lab::patches::WavePropagation1d::Solver l_solverType;
+  tsunami_lab::patches::WavePropagation1d::Solver solverType;
 
   std::cout << "####################################" << std::endl;
   std::cout << "### Tsunami Lab                  ###" << std::endl;
@@ -33,7 +33,7 @@ int main(int i_argc, char *i_argv[]) {
   std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
   std::cout << "####################################" << std::endl;
 
-  if (i_argc < 4) {
+  if (in_argc < 4) {
     std::cerr << "invalid number of arguments, usage:" << std::endl;
     std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP height velocity" << std::endl;
     std::cerr << "where CELLS is the number of cells in x-direction, "
@@ -42,18 +42,18 @@ int main(int i_argc, char *i_argv[]) {
               << std::endl;
     return EXIT_FAILURE;
   } else {
-    l_nx = atoi(i_argv[1]);
-    if (l_nx < 1) {
+    xCount = atoi(in_argv[1]);
+    if (xCount < 1) {
       std::cerr << "invalid number of cells" << std::endl;
       return EXIT_FAILURE;
     }
-    l_dxy = 10.0 / l_nx;
+    cellSize = 10.0 / xCount;
 
-    std::string l_solver = i_argv[2];
-    if (l_solver == "FWAVE") {
-      l_solverType = tsunami_lab::patches::WavePropagation::FWave;
-    } else if (l_solver == "ROE") {
-      l_solverType = tsunami_lab::patches::WavePropagation::Roe;
+    std::string solverArg = in_argv[2];
+    if (solverArg == "FWAVE") {
+      solverType = tsunami_lab::patches::WavePropagation::FWave;
+    } else if (solverArg == "ROE") {
+      solverType = tsunami_lab::patches::WavePropagation::Roe;
     } else {
       std::cerr << "invalid solver type. Please use either ROE or FWAVE"
                 << std::endl;
@@ -61,29 +61,29 @@ int main(int i_argc, char *i_argv[]) {
     }
   }
   std::cout << "runtime configuration" << std::endl;
-  std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
-  std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
-  std::cout << "  cell size:                      " << l_dxy << std::endl;
+  std::cout << "  number of cells in x-direction: " << xCount << std::endl;
+  std::cout << "  number of cells in y-direction: " << yCount << std::endl;
+  std::cout << "  cell size:                      " << cellSize << std::endl;
 
   // construct setup
-  std::string l_setupArg = i_argv[3];
-  tsunami_lab::setups::Setup *l_setup;
-  tsunami_lab::t_real l_height = 10;
-  tsunami_lab::t_real l_momentum = 50;
-  if (l_setupArg == "DAMBREAK") {
-    l_setup = new tsunami_lab::setups::DamBreak1d(10, 5, 5);
-  } else if (l_setupArg == "RARE") {
-	 if (i_argc > 4) {
-		l_height = std::stof(i_argv[4]);
-		l_momentum = std::stof(i_argv[5]) * l_height;
+  std::string setupArg = in_argv[3];
+  tsunami_lab::setups::Setup *setup;
+  tsunami_lab::real height = 10;
+  tsunami_lab::real momentum = 50;
+  if (setupArg == "DAMBREAK") {
+    setup = new tsunami_lab::setups::DamBreak1d(10, 5, 5);
+  } else if (setupArg == "RARE") {
+	 if (in_argc > 4) {
+		height = std::stof(in_argv[4]);
+		momentum = std::stof(in_argv[5]) * height;
 	 }
-    l_setup = new tsunami_lab::setups::RareRare1d(l_height, l_momentum, 5);
-  } else if (l_setupArg == "SHOCK") {
-	 if (i_argc > 4) {
-		l_height = std::stof(i_argv[4]);
-		l_momentum = std::stof(i_argv[5]) * l_height;
+    setup = new tsunami_lab::setups::RareRare1d(height, momentum, 5);
+  } else if (setupArg == "SHOCK") {
+	 if (in_argc > 4) {
+		height = std::stof(in_argv[4]);
+		momentum = std::stof(in_argv[5]) * height;
 	 }
-    l_setup = new tsunami_lab::setups::ShockShock1d(l_height, l_momentum, 5);
+    setup = new tsunami_lab::setups::ShockShock1d(height, momentum, 5);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK"
               << std::endl;
@@ -91,84 +91,84 @@ int main(int i_argc, char *i_argv[]) {
   }
 
   // construct solver
-  tsunami_lab::patches::WavePropagation *l_waveProp;
-  l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx);
+  tsunami_lab::patches::WavePropagation *waveProp;
+  waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
 
   // maximum observed height in the setup
-  tsunami_lab::t_real l_hMax =
-      std::numeric_limits<tsunami_lab::t_real>::lowest();
+  tsunami_lab::real heightMax =
+      std::numeric_limits<tsunami_lab::real>::lowest();
 
   // set up solver
-  for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++) {
-    tsunami_lab::t_real l_y = l_cy * l_dxy;
+  for (tsunami_lab::idx cellY = 0; cellY < yCount; cellY++) {
+    tsunami_lab::real y = cellY * cellSize;
 
-    for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++) {
-      tsunami_lab::t_real l_x = l_cx * l_dxy;
+    for (tsunami_lab::idx cellX = 0; cellX < xCount; cellX++) {
+      tsunami_lab::real x = cellX * cellSize;
 
       // get initial values of the setup
-      tsunami_lab::t_real l_h = l_setup->getHeight(l_x, l_y);
-      l_hMax = std::max(l_h, l_hMax);
+      tsunami_lab::real height = setup->getHeight(x, y);
+      heightMax = std::max(height, heightMax);
 
-      tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x, l_y);
-      tsunami_lab::t_real l_hv = l_setup->getMomentumY(l_x, l_y);
+      tsunami_lab::real momentumX = setup->getMomentumX(x, y);
+      tsunami_lab::real momentumY = setup->getMomentumY(x, y);
 
       // set initial values in wave propagation solver
-      l_waveProp->setHeight(l_cx, l_cy, l_h);
+      waveProp->setHeight(cellX, cellY, height);
 
-      l_waveProp->setMomentumX(l_cx, l_cy, l_hu);
+      waveProp->setMomentumX(cellX, cellY, momentumX);
 
-      l_waveProp->setMomentumY(l_cx, l_cy, l_hv);
+      waveProp->setMomentumY(cellX, cellY, momentumY);
     }
   }
 
   // derive maximum wave speed in setup; the momentum is ignored
-  tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
+  tsunami_lab::real speedMax = std::sqrt(9.81 * heightMax);
 
   // derive constant time step; changes at simulation time are ignored
-  tsunami_lab::t_real l_dt = 0.5 * l_dxy / l_speedMax;
+  tsunami_lab::real dt = 0.5 * cellSize / speedMax;
 
   // derive scaling for a time step
-  tsunami_lab::t_real l_scaling = l_dt / l_dxy;
+  tsunami_lab::real scaling = dt / cellSize;
 
   // set up time and print control
-  tsunami_lab::t_idx l_timeStep = 0;
-  tsunami_lab::t_idx l_nOut = 0;
-  tsunami_lab::t_real l_endTime = 1.25;
-  tsunami_lab::t_real l_simTime = 0;
+  tsunami_lab::idx timeStep = 0;
+  tsunami_lab::idx nOut = 0;
+  tsunami_lab::real endTime = 1.25;
+  tsunami_lab::real simTime = 0;
 
   std::cout << "entering time loop" << std::endl;
 
   // iterate over time
-  while (l_simTime < l_endTime) {
-    if (l_timeStep % 25 == 0) {
-      std::cout << "  simulation time / #time steps: " << l_simTime << " / "
-                << l_timeStep << std::endl;
+  while (simTime < endTime) {
+    if (timeStep % 25 == 0) {
+      std::cout << "  simulation time / #time steps: " << simTime << " / "
+                << timeStep << std::endl;
 
-      std::string l_path = "solution_" + std::to_string(l_nOut) + ".csv";
-      std::cout << "  writing wave field to " << l_path << std::endl;
+      std::string path = "solution_" + std::to_string(nOut) + ".csv";
+      std::cout << "  writing wave field to " << path << std::endl;
 
-      std::ofstream l_file;
-      l_file.open(l_path);
+      std::ofstream file;
+      file.open(path);
 
-      tsunami_lab::io::Csv::write(l_dxy, l_nx, 1, 1, l_waveProp->getHeight(),
-                                  l_waveProp->getMomentumX(), nullptr, l_file);
-      l_file.close();
-      l_nOut++;
+      tsunami_lab::io::Csv::write(cellSize, xCount, 1, 1, waveProp->getHeight(),
+                                  waveProp->getMomentumX(), nullptr, file);
+      file.close();
+      nOut++;
     }
 
-    l_waveProp->setGhostOutflow();
-    l_waveProp->timeStep(l_scaling, l_solverType);
+    waveProp->setGhostOutflow();
+    waveProp->timeStep(scaling, solverType);
 
-    l_timeStep++;
-    l_simTime += l_dt;
+    timeStep++;
+    simTime += dt;
   }
 
   std::cout << "finished time loop" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;
-  delete l_setup;
-  delete l_waveProp;
+  delete setup;
+  delete waveProp;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

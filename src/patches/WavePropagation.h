@@ -26,9 +26,9 @@ class tsunami_lab::patches::WavePropagation {
     /**
      * Performs a time step.
      *
-     * @param i_scaling scaling of the time step.
+     * @param in_scaling scaling of the time step.
      **/
-    virtual void timeStep( t_real i_scaling, Solver i_solver ) = 0;
+    virtual void timeStep( real in_scaling, Solver in_solver ) = 0;
 
     /**
      * Sets the values of the ghost cells according to outflow boundary conditions.
@@ -40,61 +40,61 @@ class tsunami_lab::patches::WavePropagation {
      *
      * @return stride in y-direction.
      **/
-    virtual t_idx getStride() = 0;
+    virtual idx getStride() = 0;
 
     /**
      * Gets cells' water heights.
      *
      * @return water heights.
      */
-    virtual t_real const * getHeight() = 0;
+    virtual real const * getHeight() = 0;
 
     /**
      * Gets the cells' momenta in x-direction.
      *
      * @return momenta in x-direction.
      **/
-    virtual t_real const * getMomentumX() = 0;
+    virtual real const * getMomentumX() = 0;
 
     /**
      * Gets the cells' momenta in y-direction.
      *
      * @return momenta in y-direction.
      **/
-    virtual t_real const * getMomentumY() = 0;
+    virtual real const * getMomentumY() = 0;
 
     /**
      * Sets the height of the cell to the given value.
      *
-     * @param i_ix id of the cell in x-direction.
-     * @param i_iy id of the cell in y-direction.
-     * @param i_h water height.
+     * @param in_x id of the cell in x-direction.
+     * @param in_y id of the cell in y-direction.
+     * @param in_height water height.
      **/
-    virtual void setHeight( t_idx  i_ix,
-                            t_idx  i_iy,
-                            t_real i_h ) = 0;
+    virtual void setHeight( idx  in_x,
+                            idx  in_y,
+                            real in_height ) = 0;
 
     /**
      * Sets the momentum in x-direction to the given value.
      *
-     * @param i_ix id of the cell in x-direction.
-     * @param i_iy id of the cell in y-direction.
-     * @param i_hu momentum in x-direction.
+     * @param in_x id of the cell in x-direction.
+     * @param in_y id of the cell in y-direction.
+     * @param in_momentum momentum in x-direction.
      **/
-    virtual void setMomentumX( t_idx  i_ix,
-                               t_idx  i_iy,
-                               t_real i_hu ) = 0;
+    virtual void setMomentumX( idx  in_x,
+                               idx  in_y,
+                               real in_momentum ) = 0;
 
     /**
      * Sets the momentum in y-direction to the given value.
      *
-     * @param i_ix id of the cell in x-direction.
-     * @param i_iy id of the cell in y-direction.
-     * @param i_hv momentum in y-direction.
+     * @param in_x id of the cell in x-direction.
+     * @param in_y id of the cell in y-direction.
+     * @param in_momentumVertical momentum in y-direction.
      **/
-    virtual void setMomentumY( t_idx  i_ix,
-                               t_idx  i_iy,
-                               t_real i_hv ) = 0;
+    virtual void setMomentumY( idx  in_x,
+                               idx  in_y,
+                               real in_momentumVertical ) = 0;
 };
 
 #endif

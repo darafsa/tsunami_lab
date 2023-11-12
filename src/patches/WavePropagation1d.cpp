@@ -8,90 +8,92 @@
 #include "../solvers/FWave.h"
 #include "../solvers/Roe.h"
 
-tsunami_lab::patches::WavePropagation1d::WavePropagation1d( t_idx i_nCells ) {
-  m_nCells = i_nCells;
+using namespace tsunami_lab::patches;
+
+WavePropagation1d::WavePropagation1d( idx in_cellCount ) {
+  cellCount = in_cellCount;
 
   // allocate memory including a single ghost cell on each side
-  for( unsigned short l_st = 0; l_st < 2; l_st++ ) {
-    m_h[l_st] = new t_real[  m_nCells + 2 ];
-    m_hu[l_st] = new t_real[ m_nCells + 2 ];
+  for( unsigned short i = 0; i < 2; i++ ) {
+    height[i] = new real[ cellCount + 2 ];
+    momentum[i] = new real[ cellCount + 2 ];
   }
 
   // init to zero
-  for( unsigned short l_st = 0; l_st < 2; l_st++ ) {
-    for( t_idx l_ce = 0; l_ce < m_nCells; l_ce++ ) {
-      m_h[l_st][l_ce] = 0;
-      m_hu[l_st][l_ce] = 0;
+  for( unsigned short i = 0; i < 2; i++ ) {
+    for( idx cell = 0; cell < cellCount; cell++ ) {
+      height[i][cell] = 0;
+      momentum[i][cell] = 0;
     }
   }
 }
 
-tsunami_lab::patches::WavePropagation1d::~WavePropagation1d() {
-  for( unsigned short l_st = 0; l_st < 2; l_st++ ) {
-    delete[] m_h[l_st];
-    delete[] m_hu[l_st];
+WavePropagation1d::~WavePropagation1d() {
+  for( unsigned short i = 0; i < 2; i++ ) {
+    delete[] height[i];
+    delete[] momentum[i];
   }
 }
 
-void tsunami_lab::patches::WavePropagation1d::timeStep( t_real i_scaling, Solver i_solver ) {
+void WavePropagation1d::timeStep( real in_scaling, Solver in_solver ) {
   // pointers to old and new data
-  t_real * l_hOld = m_h[m_step];
-  t_real * l_huOld = m_hu[m_step];
+  real * heightOld = height[step];
+  real * momentumOld = momentum[step];
 
-  m_step = (m_step+1) % 2;
-  t_real * l_hNew =  m_h[m_step];
-  t_real * l_huNew = m_hu[m_step];
+  step = (step+1) % 2;
+  real * heightNew =  height[step];
+  real * momentumNew = momentum[step];
 
   // init new cell quantities
-  for( t_idx l_ce = 1; l_ce < m_nCells+1; l_ce++ ) {
-    l_hNew[l_ce] = l_hOld[l_ce];
-    l_huNew[l_ce] = l_huOld[l_ce];
+  for( idx cell = 1; cell < cellCount+1; cell++ ) {
+    heightNew[cell] = heightOld[cell];
+    momentumNew[cell] = momentumOld[cell];
   }
 
   // iterate over edges and update with Riemann solutions
-  for( t_idx l_ed = 0; l_ed < m_nCells+1; l_ed++ ) {
+  for( idx edge = 0; edge < cellCount+1; edge++ ) {
     // determine left and right cell-id
-    t_idx l_ceL = l_ed;
-    t_idx l_ceR = l_ed+1;
+    idx cellLeft = edge;
+    idx cellRight = edge+1;
 
     // compute net-updates
-    t_real l_netUpdates[2][2];
+    real netUpdates[2][2];
 	 
-	 t_real l_stateLeft[3] = {l_hOld[l_ceL], l_huOld[l_ceL], 0};
-	 t_real l_stateRight[3] = {l_hOld[l_ceR], l_huOld[l_ceR], 0};
+	 real stateLeft[3] = {heightOld[cellLeft], momentumOld[cellLeft], 0};
+	 real stateRight[3] = {heightOld[cellRight], momentumOld[cellRight], 0};
 
-	 if ( i_solver == FWave ) {
-		solvers::FWave::netUpdates( l_stateLeft, 
-	 									  l_stateRight, 
-                                l_netUpdates[0],
-                                l_netUpdates[1] );
+	 if ( in_solver == FWave ) {
+		solvers::FWave::netUpdates( stateLeft, 
+	 										 stateRight, 
+                              	 netUpdates[0],
+                              	 netUpdates[1] );
 	 } else {
-		solvers::Roe::netUpdates( l_stateLeft[0], 
-	 									  l_stateRight[0], 
-	 									  l_stateLeft[1], 
-	 									  l_stateRight[1], 
-                                l_netUpdates[0],
-                                l_netUpdates[1] );
+		solvers::Roe::netUpdates( stateLeft[0], 
+	 									  stateRight[0], 
+	 									  stateLeft[1], 
+	 									  stateRight[1], 
+                                netUpdates[0],
+                                netUpdates[1] );
 	 }
 
     // update the cells' quantities
-    l_hNew[l_ceL]  -= i_scaling * l_netUpdates[0][0];
-    l_huNew[l_ceL] -= i_scaling * l_netUpdates[0][1];
+    heightNew[cellLeft]  -= in_scaling * netUpdates[0][0];
+    momentumNew[cellLeft] -= in_scaling * netUpdates[0][1];
 
-    l_hNew[l_ceR]  -= i_scaling * l_netUpdates[1][0];
-    l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
+    heightNew[cellRight]  -= in_scaling * netUpdates[1][0];
+    momentumNew[cellRight] -= in_scaling * netUpdates[1][1];
   }
 }
 
-void tsunami_lab::patches::WavePropagation1d::setGhostOutflow() {
-  t_real * l_h = m_h[m_step];
-  t_real * l_hu = m_hu[m_step];
+void WavePropagation1d::setGhostOutflow() {
+  real * heightLocal = height[step];
+  real * momentumLocal = momentum[step];
 
   // set left boundary
-  l_h[0] = l_h[1];
-  l_hu[0] = l_hu[1];
+  heightLocal[0] = heightLocal[1];
+  momentumLocal[0] = momentumLocal[1];
 
   // set right boundary
-  l_h[m_nCells+1] = l_h[m_nCells];
-  l_hu[m_nCells+1] = l_hu[m_nCells];
+  heightLocal[cellCount+1] = heightLocal[cellCount];
+  momentumLocal[cellCount+1] = momentumLocal[cellCount];
 }
