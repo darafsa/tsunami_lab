@@ -43,21 +43,21 @@ void FWave::computeInvertedEigenmatrix(real in_eigenvalues[2], real out_inverted
 }
 
 void FWave::flux(real in_state[3], real out_flux[2]) {
-	real height = state[0];
-	real momentum = state[1];
+	real height = in_state[0];
+	real momentum = in_state[1];
 
-	flux[0] = momentum;
-	flux[1] = (momentum * momentum / height + real(0.5) * const_g * height * height);
+	out_flux[0] = momentum;
+	out_flux[1] = (momentum * momentum / height + real(0.5) * const_g * height * height);
 }
 
-void FWave::computedxPsi(real in_stateLeft[3], real in_stateRight[3], real out_dxPsi) {
-	real heightLeft = in_stateLeft[0]
-	real heightRight = in_stateRight[0]
+void FWave::computedxPsi(real in_stateLeft[3], real in_stateRight[3], real & out_dxPsi) {
+	real heightLeft = in_stateLeft[0];
+	real heightRight = in_stateRight[0];
 	real bathymetryLeft = in_stateLeft[2];
 	real bathymetryRight = in_stateRight[2];
 	
 	//			   -g	  *	 bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2
-	out_dxPsi = (-const_g * (bathymetryRight - bathymetryLeft) * ((heightLeft + heightRight) / 2))
+	out_dxPsi = (-const_g * (bathymetryRight - bathymetryLeft) * ((heightLeft + heightRight) / 2));
 }
 
 void FWave::computeEigencoefficients(real in_stateLeft[3], real in_stateRight[3], real in_invertedEigenmatrix[2][2], real out_eigencoefficients[2]) {

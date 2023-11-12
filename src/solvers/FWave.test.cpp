@@ -261,7 +261,6 @@ REQUIRE(netUpdateLeft[1] == Approx(0));
 
 REQUIRE(netUpdateRight[0] == Approx(-90));
 REQUIRE(netUpdateRight[1] == Approx(-9900.002044988));
-}
 
 /*
 * Test case (dam break) with bathymetry:
@@ -332,3 +331,4 @@ REQUIRE(netUpdateLeft[1] == Approx(-397.17));
 
 REQUIRE(netUpdateRight[0] == Approx(-42.2761));
 REQUIRE(netUpdateRight[1] == Approx(-397.17));
+}

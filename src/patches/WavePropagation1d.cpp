@@ -57,8 +57,8 @@ void tsunami_lab::patches::WavePropagation1d::timeStep( t_real i_scaling, Solver
     // compute net-updates
     t_real l_netUpdates[2][2];
 	 
-	 t_real l_stateLeft[2] = {l_hOld[l_ceL], l_huOld[l_ceL]};
-	 t_real l_stateRight[2] = {l_hOld[l_ceR], l_huOld[l_ceR]};
+	 t_real l_stateLeft[3] = {l_hOld[l_ceL], l_huOld[l_ceL], 0};
+	 t_real l_stateRight[3] = {l_hOld[l_ceR], l_huOld[l_ceR], 0};
 
 	 if ( i_solver == FWave ) {
 		solvers::FWave::netUpdates( l_stateLeft, 
