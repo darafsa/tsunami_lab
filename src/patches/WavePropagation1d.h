@@ -136,7 +136,7 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
 	 void setBathymetry( idx in_x,
 	 							idx,
 	 							real in_bathymetry ) {
-		bathymetry[in_x] = in_bathymetry;
+		bathymetry[in_x + 1] = in_bathymetry;
 	};
 };
 

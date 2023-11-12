@@ -37,6 +37,9 @@ TEST_CASE( "Test the 1d wave propagation solver.", "[WaveProp1d]" ) {
     waveProp.setMomentumX( cell,
                            0,
                            0 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
   for( std::size_t cell = 50; cell < 100; cell++ ) {
     waveProp.setHeight( cell,
@@ -45,6 +48,9 @@ TEST_CASE( "Test the 1d wave propagation solver.", "[WaveProp1d]" ) {
     waveProp.setMomentumX( cell,
                            0,
                            0 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
 
   // set outflow boundary condition
@@ -86,7 +92,7 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
    */
 
   // construct solver and setup a Shock-Shock problem
-  tsunami_lab::patches::WavePropagation1d waveProp(100);
+  tsunami_lab::patches::WavePropagation1d waveProp( 100 );
 
   for (std::size_t cell = 0; cell < 50; cell++)
   {
@@ -96,6 +102,9 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
     waveProp.setMomentumX( cell,
                            0,
                            122.0337839252433 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
   for (std::size_t cell = 50; cell < 100; cell++)
   {
@@ -105,6 +114,9 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Shock-Shock Problem).", "[
     waveProp.setMomentumX( cell,
                            0,
                            -122.0337839252433 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
 
   // set outflow boundary condition
@@ -134,7 +146,7 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
    */
 
   // construct solver and setup a Rare-Rare problem
-  tsunami_lab::patches::WavePropagation1d waveProp(100);
+  tsunami_lab::patches::WavePropagation1d waveProp( 100 );
 
   for (std::size_t cell = 0; cell < 50; cell++)
   {
@@ -144,6 +156,9 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
     waveProp.setMomentumX( cell,
                              0,
                              -906.6229611756387 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
   for (std::size_t cell = 50; cell < 100; cell++)
   {
@@ -153,6 +168,9 @@ TEST_CASE("Test the 1d wave propagation FWave solver (Rare-Rare Problem", "[Wave
     waveProp.setMomentumX( cell,
                              0,
                              906.6229611756387 );
+	 waveProp.setBathymetry( cell,
+	 								 0,
+									 0 );
   }
 
   // set outflow boundary condition
