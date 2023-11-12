@@ -14,8 +14,10 @@ TEST_CASE("Test the computation of the Eigenvalues (FWave speeds).", "[FWaveEige
 {
 /*
  * Test case:
- *  h:  10 | 9
- *  hu: -3 | 3
+ *
+ *  h: 10 | 9
+ * hu: -3 | 3
+ *  b:  0 | 0
  *
  * FWave height: 9.5
  * FWave velocity: ((-3/10) * sqrt(10) + (3/9) * sqrt(9)) / (sqrt(10) + sqrt(9))
@@ -26,8 +28,8 @@ TEST_CASE("Test the computation of the Eigenvalues (FWave speeds).", "[FWaveEige
  * wolframalpha.com query: ((-3/10) * sqrt(10) + (3/9) * sqrt(9)) / (sqrt(10) + sqrt(9)) - sqrt(9.80665 * 9.5)
  */
 
-float stateLeft[2] =  {10, -3};
-float stateRight[2] = {9, 3};
+float stateLeft[3] =  {10, -3, 0};
+float stateRight[3] = {9, 3, 0};
 float eigenvaluesRoe[2];
 tsunami_lab::solvers::FWave::computeEigenvalues( stateLeft,
                                                  stateRight,
@@ -41,9 +43,11 @@ TEST_CASE("Test the computation of the InvertedEigenmatrix.", "[FWaveInvertedEig
 {
 /*
  * Test case:
- *  h:   10 | 9
- *  u:   -3 | 3
- *  hu: -30 | 27
+ *
+ *  h:  10 | 9
+ *  u:  -3 | 3
+ * hu: -30 | 27
+ *  b:   0 | 0
  *
  * The derivation of the Eigenvalues is given above.
  *
@@ -78,9 +82,11 @@ TEST_CASE("Test the computation of the Eigencoefficients (wave strenghts).", "[F
 {
 /*
  * Test case:
- *  h:   10 | 9
- *  u:   -3 | 3
- *  hu: -30 | 27
+ *
+ *  h:  10 | 9
+ *  u:  -3 | 3
+ * hu: -30 | 27
+ *  b:   0 | 0
  *
  * The derivation of the Eigenmatrix is given above.
  *
@@ -95,8 +101,8 @@ TEST_CASE("Test the computation of the Eigencoefficients (wave strenghts).", "[F
  */
 
 float eigenmatrix[2][2] = {{0.49590751974393229, -0.051802159398648326}, {0.50409248025606771, 0.051802159398648326}};
-float stateLeft[2] = {10, -30};
-float stateRight[2] = {9, 27};
+float stateLeft[3] = {10, -30, 0};
+float stateRight[3] = {9, 27, 0};
 float eigencoefficients[2];
 tsunami_lab::solvers::FWave::computeEigencoefficients( stateLeft,
                                                        stateRight,
@@ -116,7 +122,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
  *      left | right
  *  h:    10 | 9
  *  u:    -3 | 3
- *  hu:  -30 | 27
+ * hu:   -30 | 27
+ *  b:     0 | 0
  *
  * The derivation of the FWave Eigenvalues (s1, s2) and eigencoefficients (a1, a1) is given above.
  *
@@ -131,8 +138,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
  *                      | s2 |   | 224.4031581938423361414   |
  */
 
-float stateLeft[2] = {10, -30};
-float stateRight[2] = {9, 27};
+float stateLeft[3] = {10, -30, 0};
+float stateRight[3] = {9, 27, 0};
 float netUpdateLeft[2];
 float netUpdateRight[2];
 
@@ -152,7 +159,8 @@ REQUIRE(netUpdateRight[1] == Approx(224.4031581938423361414));
 *
 *     left | right
 *   h:  10 | 8
-*   hu:  0 | 0
+*  hu:   0 | 0
+*   b:   0 | 0
 *
 * FWave speeds are given as:
 *
@@ -166,6 +174,8 @@ REQUIRE(netUpdateRight[1] == Approx(224.4031581938423361414));
 *          | 0.5 -0.0532217 |
 *   Rinv = |                |
 *          | 0.5 -0.0532217 |
+*
+*   wolframalpha.com query: {{0.5,-0.0532217},{0.5,0.0532217}} * {{0},{1/2*9.80665*8^2 - 1/2*9.80665*10^2}}
 *
 * Multiplicaton with the jump in fluxes gives the wave strengths:
 *
@@ -204,9 +214,10 @@ REQUIRE(netUpdateRight[1] == Approx(-88.2599));
  * Test case supersonic problem
  *
  *      left | right
- *  h:   1   | 1
+ *  h:    1  | 1
  *  u:   100 | 10
- *  hu:  100 | 10
+ * hu:   100 | 10
+ *  b:    0  | 0
  *
  *  FWave Eigenvalues are given as:
  *
@@ -251,3 +262,73 @@ REQUIRE(netUpdateLeft[1] == Approx(0));
 REQUIRE(netUpdateRight[0] == Approx(-90));
 REQUIRE(netUpdateRight[1] == Approx(-9900.002044988));
 }
+
+/*
+* Test case (dam break) with bathymetry:
+*
+*     left | right
+*   h:  10 |  8
+*  hu:   0 |  0
+*   b:  -6 | -13
+*
+* FWave speeds are given as:
+*
+*   s1 = -sqrt(9.80665 * 9)
+*   s2 =  sqrt(9.80665 * 9)
+*
+* Inversion of the matrix of right Eigenvectors:
+*
+*   wolframalpha.com query: invert {{1, 1}, {-sqrt(9.80665 * 9), sqrt(9.80665 * 9)}}
+*
+*          | 0.5    -0.0532217 |
+*   Rinv = |                   |
+*          | 0.5    -0.0532217 |
+*
+* new bathymetry (dxPsi) computation:
+*
+* -g * (bathymetryRight - bathymetryLeft) * ((heightLeft + heightRight) / 2)
+*
+* wolframalpha.com query: {-9.80665 * (-13 + 6) * ((10 + 8) / 2)}
+* 
+* -9.80665 * (-13 + 6) * ((10 + 8) / 2) = 617.81895
+*
+* Multiplicaton with the jump in fluxes gives the wave strengths:
+*
+* wolframalpha.com query: {{0.5,-0.0532217},{0.5,0.0532217}} * {{0},{1/2*9.80665*8^2 - 1/2*9.80665*10^2 + 9.80665 * (-13 + 6) * (10 + 8) / 2}}
+*
+*        |  0              -          0                   |   |  42.2761  |   | a1 |
+* Rinv * |                                                | = |           | = |    |
+*        | 1/2*9.80665*8^2 - 1/2*9.80665*10^2 - 617.81895 |   | -42.2761  |   | a2 |
+*
+* The net-updates are given through the scaled eigenvectors.
+*
+* wolframalpha.com query: 42.2761* {{1},{-sqrt(9.80665 * 9)}} for update #1
+*
+*                      |  1 |   |   42.2761   |
+* update #1:      a1 * |    | = |             |
+*                      | s1 |   |  -397.17    |
+*
+* wolframalpha.com query: -42.2761* {{1},{sqrt(9.80665 * 9)}} for update #2
+*
+*                      |  1 |   |  -42.2761   |
+* update #2:      a2 * |    | = |             |
+*                      | s2 |   |  -397.17    |
+*/
+
+stateLeft[0] = 10;
+stateLeft[1] = 0;
+stateLeft[2] = -6;
+stateRight[0] = 8;
+stateRight[1] = 0;
+stateRight[2] = -13;
+
+tsunami_lab::solvers::FWave::netUpdates( stateLeft,
+                                         stateRight,
+                                         netUpdateLeft,
+                                         netUpdateRight );
+
+REQUIRE(netUpdateLeft[0] == Approx(42.2761));
+REQUIRE(netUpdateLeft[1] == Approx(-397.17));
+
+REQUIRE(netUpdateRight[0] == Approx(-42.2761));
+REQUIRE(netUpdateRight[1] == Approx(-397.17));
