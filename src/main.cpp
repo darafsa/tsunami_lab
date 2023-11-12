@@ -9,6 +9,7 @@
 #include "setups/DamBreak1d/DamBreak1d.h"
 #include "setups/RareRare1d/RareRare1d.h"
 #include "setups/ShockShock1d/ShockShock1d.h"
+#include "setups/Bathymetry1d/Bathymetry1d.h"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -84,6 +85,8 @@ int main(int in_argc, char *in_argv[]) {
 		momentum = std::stof(in_argv[5]) * height;
 	 }
     setup = new tsunami_lab::setups::ShockShock1d(height, momentum, 5);
+  } else if(setupArg == "BATHYMETRY") {
+	 setup = new tsunami_lab::setups::Bathymetry1d(10, 5, 5);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK"
               << std::endl;
@@ -136,7 +139,7 @@ int main(int in_argc, char *in_argv[]) {
   // set up time and print control
   tsunami_lab::idx timeStep = 0;
   tsunami_lab::idx nOut = 0;
-  tsunami_lab::real endTime = 1.25;
+  tsunami_lab::real endTime = 3;
   tsunami_lab::real simTime = 0;
 
   std::cout << "entering time loop" << std::endl;
@@ -153,8 +156,14 @@ int main(int in_argc, char *in_argv[]) {
       std::ofstream file;
       file.open(path);
 
-      tsunami_lab::io::Csv::write(cellSize, xCount, 1, 1, waveProp->getHeight(),
-                                  waveProp->getMomentumX(), nullptr, file);
+      tsunami_lab::io::Csv::write(cellSize, 
+											 xCount, 
+											 1, 1, 
+											 waveProp->getHeight(),
+                                  waveProp->getBathymetry(), 
+											 waveProp->getMomentumX(), 
+											 nullptr, 
+											 file);
       file.close();
       nOut++;
     }

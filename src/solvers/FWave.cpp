@@ -56,8 +56,8 @@ void FWave::computeDxPsi(real in_stateLeft[3], real in_stateRight[3], real & out
 	real bathymetryLeft = in_stateLeft[2];
 	real bathymetryRight = in_stateRight[2];
 	
-	//			    -g	  *	 bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2
-	out_dxPsi = (-const_g * (bathymetryRight - bathymetryLeft) * ((heightLeft + heightRight) / 2));
+	//			   -g	  *	 bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2
+	out_dxPsi = -const_g * (bathymetryRight - bathymetryLeft) * (heightLeft + heightRight) / 2;
 }
 
 void FWave::computeEigencoefficients(real in_stateLeft[3], real in_stateRight[3], real in_invertedEigenmatrix[2][2], real out_eigencoefficients[2]) {

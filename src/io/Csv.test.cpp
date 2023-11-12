@@ -22,6 +22,7 @@ TEST_CASE( "Test the CSV-writer for 1D settings.", "[CsvWrite1d]" ) {
                                1,
                                7,
                                l_h+1,
+										 nullptr,
                                l_hu+1,
                                nullptr,
                                l_stream0 );
@@ -59,6 +60,7 @@ TEST_CASE( "Test the CSV-writer for 2D settings.", "[CsvWrite2d]" ) {
                                2,
                                4,
                                l_h+4+1,
+										 nullptr,
                                l_hu+4+1,
                                l_hv+4+1,
                                l_stream1 );

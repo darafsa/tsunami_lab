@@ -96,6 +96,10 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
       return nullptr;
     }
 
+	 real const * getBathymetry(){
+		return bathymetry+1;
+	 }
+
     /**
      * @brief Sets the height of the cell to the given value.
      *
