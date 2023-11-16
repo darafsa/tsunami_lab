@@ -69,6 +69,18 @@ void WavePropagation1d::timeStep( real in_scaling, Solver in_solver ) {
 	 real stateLeft[3] = { heightOld[cellLeft], momentumOld[cellLeft], bathymetry[cellLeft] };
 	 real stateRight[3] = { heightOld[cellRight], momentumOld[cellRight], bathymetry[cellRight] };
 
+	 if(bathymetry[cellLeft] > 0) {
+		stateLeft[0] = stateRight[0];
+		stateLeft[1] = -stateRight[1];
+		stateLeft[2] = stateRight[2];
+	 }
+
+	 if(bathymetry[cellRight] > 0) {
+		stateRight[0] = stateLeft[0];
+		stateRight[1] = -stateLeft[1];
+		stateRight[2] = stateLeft[2];
+	 }
+
 	 if ( in_solver == FWAVE ) {
 		solvers::FWave::netUpdates( stateLeft, 
 	 										 stateRight, 
