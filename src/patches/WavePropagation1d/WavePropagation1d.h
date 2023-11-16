@@ -34,6 +34,9 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
     //! bathymetry for all cells
     real * bathymetry = nullptr;
 
+	 //! minmal bathymetry depth
+	 real dy = -20;
+
   public:
     /**
      * @brief Constructs the 1d wave propagation solver.
@@ -140,6 +143,9 @@ class tsunami_lab::patches::WavePropagation1d: public WavePropagation {
 	 void setBathymetry( idx in_x,
 	 							idx,
 	 							real in_bathymetry ) {
+		// if(in_bathymetry > dy && in_bathymetry < 0) {
+		// 	in_bathymetry = dy;
+		// }
 		bathymetry[in_x + 1] = in_bathymetry;
 	};
 };

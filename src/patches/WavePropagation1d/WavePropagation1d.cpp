@@ -7,8 +7,8 @@
  * One-dimensional wave propagation patch.
  **/
 #include "WavePropagation1d.h"
-#include "../solvers/FWave.h"
-#include "../solvers/Roe.h"
+#include "../../solvers/FWave.h"
+#include "../../solvers/Roe.h"
 
 using namespace tsunami_lab::patches;
 
