@@ -97,7 +97,7 @@ int main(int in_argc, char *in_argv[]) {
   tsunami_lab::setups::Setup *setup;
   tsunami_lab::real height = 10;
   tsunami_lab::real momentum = 50;
-  if (in_argc > 5) {
+  if (in_argc > 6) {
 		height = std::stof(in_argv[6]);
 		momentum = std::stof(in_argv[7]) * height;
 	 }
@@ -165,6 +165,10 @@ int main(int in_argc, char *in_argv[]) {
   tsunami_lab::idx nOut = 0;
   tsunami_lab::real endTime = 1.25;
   tsunami_lab::real simTime = 0;
+
+  if (in_argc > 8) {
+	 endTime = std::stof(in_argv[8]);
+  }
 
   std::cout << "entering time loop" << std::endl;
 
