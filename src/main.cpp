@@ -123,7 +123,7 @@ int main(int in_argc, char *in_argv[]) {
 	 setup = new tsunami_lab::setups::ShockShockReflective1d(height, momentum, 5);
 	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if(setupArg == "DAMBREAK2D") {
-	 setup = new tsunami_lab::setups::DamBreak2d(10, 5, 5, xCount, yCount);
+	 setup = new tsunami_lab::setups::DamBreak2d(10, 5, 5, 10, 10);
 	 waveProp = new tsunami_lab::patches::WavePropagation2d(xCount, yCount);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK" << std::endl;

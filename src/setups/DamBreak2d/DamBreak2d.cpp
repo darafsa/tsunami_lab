@@ -8,13 +8,13 @@
  **/
 #include "DamBreak2d.h"
 
-tsunami_lab::setups::DamBreak2d::DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, idx in_cellCountX, idx in_cellCountY ) {
+tsunami_lab::setups::DamBreak2d::DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax ) {
 	heightInner = in_heightInner;
 	heightOuter = in_heightOuter;
 	radiusDam = in_radiusDam;
 
-	centerDam[0] = in_cellCountX/2 + 1;
-	centerDam[1] = in_cellCountY/2 + 1;
+	centerDam[0] = in_xMax/2;
+	centerDam[1] = in_yMax/2;
 }
 
 tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getHeight( t_real in_x, t_real in_y ) const {

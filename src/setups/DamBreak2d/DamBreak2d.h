@@ -33,7 +33,7 @@ class tsunami_lab::setups::DamBreak2d: public Setup {
 		real radiusDam = 0;
 
 		//! center point of dam; 0: x, 1: y
-		idx centerDam[2];
+		real centerDam[2];
 
 	public:
 		/**
@@ -42,10 +42,10 @@ class tsunami_lab::setups::DamBreak2d: public Setup {
 		 * @param in_heightInner water height on the inner side of the dam.
 		 * @param in_heightOuter water height on the outer side of the dam.
 		 * @param in_radiusDam radius of the dam.
-		 * @param in_cellCountX cell count in x-direction.
-		 * @param in_cellCountY cell count in y-direction.
+		 * @param in_xMax max x position.
+		 * @param in_yMax max y position.
 		**/
-		DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, idx in_cellCountX, idx in_cellCountY  );
+		DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax );
 
 		/**
 		 * @brief Gets the water height at a given point.
