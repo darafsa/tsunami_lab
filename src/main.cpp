@@ -6,7 +6,9 @@
  **/
 #include "io/Csv.h"
 #include "patches/WavePropagation1d/WavePropagation1d.h"
+#include "patches/WavePropagation2d/WavePropagation2d.h"
 #include "setups/DamBreak1d/DamBreak1d.h"
+#include "setups/DamBreak2d/DamBreak2d.h"
 #include "setups/RareRare1d/RareRare1d.h"
 #include "setups/ShockShock1d/ShockShock1d.h"
 #include "setups/Bathymetry1d/Bathymetry1d.h"
@@ -40,12 +42,13 @@ int main(int in_argc, char *in_argv[]) {
     std::cerr << "  ./build/tsunami_lab CELLS SOLVER SETUP BOUNDARYLEFT BOUNDARYRIGHT height velocity" << std::endl;
     std::cerr << "where CELLS is the number of cells in x-direction, "
                  "SOLVER the solver type [FWAVE, ROE], "
-					  "SETUP the setup to use [DAMBREAK, RARE, SHOCK, BATHYMETRY, SHOCKREFLECT] and "
+					  "SETUP the setup to use [DAMBREAK, DAMBREAK2D, RARE, SHOCK, BATHYMETRY, SHOCKREFLECT] and "
 					  "BOUNDARY[LEFT/RIGT] the boundary condition to use [OUTFLOW, REFLECTING]."
               << std::endl;
     return EXIT_FAILURE;
   } else {
     xCount = atoi(in_argv[1]);
+    yCount = atoi(in_argv[1]);
     if (xCount < 1) {
       std::cerr << "invalid number of cells" << std::endl;
       return EXIT_FAILURE;
@@ -92,6 +95,9 @@ int main(int in_argc, char *in_argv[]) {
     return EXIT_FAILURE;
   }
 
+  // construct solver
+  tsunami_lab::patches::WavePropagation *waveProp;
+
   // construct setup
   std::string setupArg = in_argv[3];
   tsunami_lab::setups::Setup *setup;
@@ -103,23 +109,26 @@ int main(int in_argc, char *in_argv[]) {
 	 }
   if (setupArg == "DAMBREAK") {
     setup = new tsunami_lab::setups::DamBreak1d(10, 5, 5);
+	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if (setupArg == "RARE") {
     setup = new tsunami_lab::setups::RareRare1d(height, momentum, 5);
+	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if (setupArg == "SHOCK") {
     setup = new tsunami_lab::setups::ShockShock1d(height, momentum, 5);
+	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if(setupArg == "BATHYMETRY") {
 	 setup = new tsunami_lab::setups::Bathymetry1d(10, 5, 5);
+	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if(setupArg == "SHOCKREFLECT") {
 	 setup = new tsunami_lab::setups::ShockShockReflective1d(height, momentum, 5);
+	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
+  } else if(setupArg == "DAMBREAK2D") {
+	 setup = new tsunami_lab::setups::DamBreak2d(10, 5, 5, xCount, yCount);
+	 waveProp = new tsunami_lab::patches::WavePropagation2d(xCount, yCount);
   } else {
-    std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK"
-              << std::endl;
+    std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK" << std::endl;
     return EXIT_FAILURE;
   }
-
-  // construct solver
-  tsunami_lab::patches::WavePropagation *waveProp;
-  waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
 
   // maximum observed height in the setup
   tsunami_lab::real heightMax =
