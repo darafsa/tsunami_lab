@@ -10,20 +10,24 @@
 
 #include "Subcritical1d.h"
 
-tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getHeight(t_real i_x,
+tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getHeight(t_real in_x,
                                                                   t_real) const
 {
-  if (x >= 0 && x <= 25){
-    return -getBathymetry;
+  if (in_x >= 0 && in_x <= 25){
+    return -getBathymetry(in_x);
   }
+  else
+  return 0;
 }
 
-tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getMomentumX(t_real i_x,
+tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getMomentumX(t_real in_x,
                                                                      t_real) const
 {
-  if (x >= 0 && x <= 25){
+  if (in_x >= 0 && in_x <= 25){
     return 4.42;
   }
+  else
+  return 0;
 }
 
 tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getMomentumY(t_real,
@@ -35,8 +39,8 @@ tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getMomentumY(t_real,
 tsunami_lab::t_real tsunami_lab::setups::Subcritical1d::getBathymetry(t_real in_x,
                                                                   	  t_real) const
 {
-  if (x > 8 && x < 12){
-    return (-1.8 - 0.05 * (x - 10)^2);
+  if (in_x > 8 && in_x < 12){
+    return (-1.8 - 0.05 * (in_x - 10)^2);
   }
   else {
     return -2;

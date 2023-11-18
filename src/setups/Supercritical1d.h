@@ -24,19 +24,20 @@ class tsunami_lab::setups::Supercritical1d: public Setup {
     /**
      * @brief Gets the water height at a given point.
      *
-     * @param i_x x-coordinate of the queried point.
+     * @param in_x x-coordinate of the queried point.
      * @return height at the given point.
      **/
-    t_real getHeight( t_real i_x,
+    t_real getHeight( t_real in_x,
                       t_real      ) const;
 
     /**
      * @brief Gets the momentum in x-direction.
      *
+     * @param in_x x-coordinate of the queried point.
      * @return momentum in x-direction.
      **/
-    t_real getMomentumX( t_real i_x,
-                         t_real     ) const;
+    t_real getMomentumX( t_real in_x,
+                         t_real      ) const;
 
     /**
      * @brief Gets the momentum in y-direction.
@@ -50,11 +51,10 @@ class tsunami_lab::setups::Supercritical1d: public Setup {
      * @brief Gets the bathymetry at a given point.
      *
      * @param i_x x-coordinate of the queried point.
-     * @param i_y y-coordinate of the queried point.
      * @return bathymetry.
      **/
-    t_real getBathymetry( t_real i_x,
-                          t_real     ) const;
+    t_real getBathymetry( t_real in_x,
+                          t_real      ) const;
 
 };
 
