@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4. Two Dimensional Solver | Project Report &mdash; Tsunami Projekt  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="3. Bathymetry &amp; Boundary Conditions | Project Report" href="03_BathymetryBoundaryConditions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Tsunami Projekt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Tsunami Projekt: User Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_RiemannSolver.html">1. Riemann Solver | Project Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_FiniteVolumeDiscretization.html">2. Finite Volume Discretization | Project Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_BathymetryBoundaryConditions.html">3. Bathymetry &amp; Boundary Conditions | Project Report</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Two Dimensional Solver | Project Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dimensional-splitting">Dimensional Splitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#circular-two-dimensional-dambreak">Circular two-dimensional Dambreak</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bathymetry-support-in-two-dimensional-solver">Bathymetry Support in two-dimensional Solver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-member-contributions">Individual Member Contributions</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Tsunami Projekt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">4. Two Dimensional Solver | Project Report</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/04_TwoDimensionalSolver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="two-dimensional-solver-project-report">
+<h1>4. Two Dimensional Solver | Project Report<a class="headerlink" href="#two-dimensional-solver-project-report" title="Link to this heading"></a></h1>
+<section id="dimensional-splitting">
+<h2>Dimensional Splitting<a class="headerlink" href="#dimensional-splitting" title="Link to this heading"></a></h2>
+<p>We achieve two-dimensionality through dimensional splitting, i.e. first the x-sweep is calculated where:</p>
+<p><span class="math notranslate nohighlight">\(Q_{i,j}^* = Q_{i,j}^n - \frac{\Delta t}{\Delta x} \left( A^+ \Delta Q_{i-1/2,j} + A^- \Delta Q_{i+1/2,j} \right)  \quad \forall i \in \{ 1, .., n \}, \; j \in \{ 0, .., n+1 \}\)</span></p>
+<p>and then the y-sweep is calculated by using the result of the x-sweep <span class="math notranslate nohighlight">\(Q_{i,j}^*\)</span> :</p>
+<p><span class="math notranslate nohighlight">\(Q_{i,j}^{n+1} = Q_{i,j}^* - \frac{\Delta t}{\Delta y} \left( B^+ \Delta Q^*_{i,j-1/2} + B^- \Delta Q^*_{i,j+1/2} \right)  \quad \forall i,j \in \{ 1, .., n \}\)</span></p>
+<p>This was implemented through a new Wavepropagation2d patch to preserve the functionality of the one dimensional solver.</p>
+<p>Now there needs to be more memory allocated and deleted:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">WavePropagation2d</span><span class="o">::</span><span class="n">WavePropagation2d</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">in_cellCountX</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">in_cellCountY</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_cellCountX</span><span class="p">;</span>
+<span class="w">  </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_cellCountY</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// allocate memory including a single ghost cell on each side</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="o">*</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">];</span>
+<span class="w">    </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="o">*</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">];</span>
+<span class="w">    </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="o">*</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">];</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">bathymetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="o">*</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">];</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">array1d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">real</span><span class="p">[</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="p">];</span>
+
+<span class="w">  </span><span class="c1">// init to zero</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cellCountY</span><span class="p">;</span><span class="w"> </span><span class="n">cell</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">array1d</span><span class="p">[</span><span class="n">cell</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">WavePropagation2d</span><span class="o">::~</span><span class="n">WavePropagation2d</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">delete</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">];</span>
+<span class="w">      </span><span class="k">delete</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">];</span>
+<span class="w">      </span><span class="k">delete</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">][</span><span class="n">x</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">    </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">    </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Timestep function x-sweep:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">WavePropagation2d::timeStep</span><span class="p">(</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_scaling</span><span class="p">,</span><span class="w"> </span><span class="n">Solver</span><span class="w"> </span><span class="n">in_solver</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// pointers to old and new data</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">heightOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">momentumXOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">momentumYOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+
+<span class="w">  </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">step</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">heightNew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">momentumXNew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">momentumYNew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+
+<span class="w">  </span><span class="c1">// init new cell quantities</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">heightNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumXNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumXOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumYNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumYOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// iterate over edges and update with Riemann solutions in x-direction</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountY</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">edgeX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">edgeX</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">edgeX</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// determine cell-id</span>
+<span class="w">      </span><span class="n">idx</span><span class="w"> </span><span class="n">cellLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edgeX</span><span class="p">;</span>
+<span class="w">      </span><span class="n">idx</span><span class="w"> </span><span class="n">cellRight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edgeX</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">      </span><span class="c1">// compute net-updates</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">heightOld</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">],</span><span class="w"> </span><span class="n">momentumXOld</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">],</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">heightOld</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">],</span><span class="w"> </span><span class="n">momentumXOld</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">],</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bathymetry</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bathymetry</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">in_solver</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FWAVE</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">solvers</span><span class="o">::</span><span class="n">FWave</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">,</span><span class="w"> </span><span class="n">stateRight</span><span class="p">,</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">solvers</span><span class="o">::</span><span class="n">Roe</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="c1">// update the cells&#39; quantities</span>
+<span class="w">      </span><span class="n">heightNew</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumXNew</span><span class="p">[</span><span class="n">cellLeft</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="w">      </span><span class="n">heightNew</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumXNew</span><span class="p">[</span><span class="n">cellRight</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>and then the y-sweep:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// iterate over edges and update with Riemann solutions in y-direction</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">edgeY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">edgeY</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cellCountX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">edgeY</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// determine cell-id</span>
+<span class="w">      </span><span class="n">idx</span><span class="w"> </span><span class="n">cellTop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edgeY</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+<span class="w">      </span><span class="n">idx</span><span class="w"> </span><span class="n">cellBottom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edgeY</span><span class="p">;</span>
+
+<span class="w">      </span><span class="c1">// compute net-updates</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">heightOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">],</span><span class="w"> </span><span class="n">momentumYOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">],</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">]</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">heightOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">],</span><span class="w"> </span><span class="n">momentumYOld</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">],</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">]</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bathymetry</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">        </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">in_solver</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FWAVE</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">solvers</span><span class="o">::</span><span class="n">FWave</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">,</span><span class="w"> </span><span class="n">stateRight</span><span class="p">,</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">solvers</span><span class="o">::</span><span class="n">Roe</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="c1">// update the cells&#39; quantities</span>
+<span class="w">      </span><span class="n">heightNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumYNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellBottom</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="w">      </span><span class="n">heightNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">      </span><span class="n">momentumYNew</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">cellTop</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>For the ghost cells a copyGhostCells function was implemented (respectively for Outflow and Recflection). Therefore, the original setGhostOutflow function was altered:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">WavePropagation2d::setGhostOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">Boundary</span><span class="w"> </span><span class="n">in_boundary</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// set left boundary</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">in_boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OUTFLOW</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">copyGhostCellsOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">bathymetry</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">in_boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">REFLECTING</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">copyGhostCellsReflecting</span><span class="p">(</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsReflecting</span><span class="p">(</span><span class="w"> </span><span class="n">momentumX</span><span class="p">[</span><span class="n">step</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsReflecting</span><span class="p">(</span><span class="w"> </span><span class="n">momentumY</span><span class="p">[</span><span class="n">step</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">copyGhostCellsReflecting</span><span class="p">(</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>to use the copy function for initialization of the grid like boundary structure:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">WavePropagation2d::copyGhostCellsReflecting</span><span class="p">(</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">out_grid</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_value</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">idx</span><span class="w"> </span><span class="n">xMax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cellCountX</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">idx</span><span class="w"> </span><span class="n">yMax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cellCountY</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">xMax</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out_grid</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out_grid</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">yMax</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">yMax</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out_grid</span><span class="p">[</span><span class="n">xMax</span><span class="p">][</span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">out_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">  </span><span class="n">out_grid</span><span class="p">[</span><span class="n">xMax</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">  </span><span class="n">out_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">yMax</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="w">  </span><span class="n">out_grid</span><span class="p">[</span><span class="n">xMax</span><span class="p">][</span><span class="n">yMax</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_value</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="circular-two-dimensional-dambreak">
+<h3>Circular two-dimensional Dambreak<a class="headerlink" href="#circular-two-dimensional-dambreak" title="Link to this heading"></a></h3>
+<p>To test the new two-dimensionality of the solver, a circular dam break setup with following inital values:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\begin{split}\begin{cases} [h, hu, hv]^T = [10, 0, 0]^T &amp;\text{if } \sqrt{x^2+y^2} &lt; 10 \\
+              [h, hu, hv]^T = [5, 0, 0]^T  \quad &amp;\text{else}
+\end{cases}\end{split}\]</div>
+</div></blockquote>
+<p>is implemented in the computational domain <span class="math notranslate nohighlight">\([-50, 50]^2\)</span> :</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="p">(</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_heightInner</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_heightOuter</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_radiusDam</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_xMax</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_yMax</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">heightInner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_heightInner</span><span class="p">;</span>
+<span class="w">  </span><span class="n">heightOuter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_heightOuter</span><span class="p">;</span>
+<span class="w">  </span><span class="n">radiusDam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_radiusDam</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_xMax</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+<span class="w">  </span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_yMax</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="o">::</span><span class="n">getHeight</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_x</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_y</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="n">distanceFromCenter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">in_x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">in_x</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">in_y</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">in_y</span><span class="p">));</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">distanceFromCenter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">radiusDam</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">heightInner</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">heightOuter</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="o">::</span><span class="n">getMomentumX</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="o">::</span><span class="n">getMomentumY</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">DamBreak2d</span><span class="o">::</span><span class="n">getBathymetry</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Visualized solution of 2dDambreak in paraview:</p>
+<video autoplay="True" controls="True" height="300" loop="True" preload="auto" width="650"><source src="_static/dambreak_2d.mp4" type="video/mp4"></video></section>
+<section id="bathymetry-support-in-two-dimensional-solver">
+<h3>Bathymetry Support in two-dimensional Solver<a class="headerlink" href="#bathymetry-support-in-two-dimensional-solver" title="Link to this heading"></a></h3>
+<p>Added the bathymetry of the computational domain in the Bathymetry2D setup (added an obstacle):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="p">(</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_heightInner</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_heightOuter</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_radiusDam</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_xMax</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_yMax</span><span class="p">,</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_scaling</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">heightInner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_heightInner</span><span class="p">;</span>
+<span class="w">  </span><span class="n">heightOuter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_heightOuter</span><span class="p">;</span>
+<span class="w">  </span><span class="n">radiusDam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_radiusDam</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">in_scaling</span><span class="p">;</span>
+<span class="w">  </span><span class="n">scaling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_scaling</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">in_xMax</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scaling</span><span class="p">;</span>
+<span class="w">  </span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">in_yMax</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">scaling</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="o">::</span><span class="n">getHeight</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_x</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_y</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">real</span><span class="w"> </span><span class="n">distanceFromCenter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">in_x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">in_x</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">in_y</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">centerDam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">in_y</span><span class="p">));</span>
+<span class="w">  </span><span class="c1">// t_real distanceFromCenter = sqrt(in_x*in_x + in_y*in_y);</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">distanceFromCenter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">radiusDam</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">heightInner</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">heightOuter</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="o">::</span><span class="n">getMomentumX</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="o">::</span><span class="n">getMomentumY</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">Bathymetry2d</span><span class="o">::</span><span class="n">getBathymetry</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_x</span><span class="p">,</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">in_y</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">in_x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">7.5</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">in_x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">in_y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">7.5</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">in_y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Visualized solution of Bathymetry2D with obstacle (sadly no waves are influenced by bathymetry):</p>
+<video autoplay="True" controls="True" height="300" loop="True" preload="auto" width="650"><source src="_static/bathymetry_bump_2d.mp4" type="video/mp4"></video></section>
+</section>
+<section id="individual-member-contributions">
+<h2>Individual Member Contributions<a class="headerlink" href="#individual-member-contributions" title="Link to this heading"></a></h2>
+<p>Marek Sommerfeld: two-dimensional solver integration, project report</p>
+<p>Moritz Rätz: project report, two-dimensional solver integration</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="03_BathymetryBoundaryConditions.html" class="btn btn-neutral float-left" title="3. Bathymetry &amp; Boundary Conditions | Project Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marek Sommerfeld, Moritz Rätz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

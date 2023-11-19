@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2. Finite Volume Discretization | Project Report &mdash; Tsunami Projekt  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Bathymetry &amp; Boundary Conditions | Project Report" href="03_BathymetryBoundaryConditions.html" />
+    <link rel="prev" title="1. Riemann Solver | Project Report" href="01_RiemannSolver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Tsunami Projekt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Tsunami Projekt: User Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_RiemannSolver.html">1. Riemann Solver | Project Report</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Finite Volume Discretization | Project Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#integration-of-interchangeability-of-solver-type">Integration of Interchangeability of Solver Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-of-the-middle-states-csv-as-sanity-check">Usage of the middle states csv as sanity check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-of-shock-shock-and-rare-rare-problems">Implementation of shock-shock and rare-rare Problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#observation-of-the-influence-of-initial-parameters-on-shock-shock-rare-rare-problems">Observation of the influence of initial parameters on shock-shock/rare-rare problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#observation-of-the-influence-of-the-initial-parameters-on-dam-break-problems">Observation of the influence of the initial parameters on dam break problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#village-evacuation">Village Evacuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-member-contributions">Individual Member Contributions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="03_BathymetryBoundaryConditions.html">3. Bathymetry &amp; Boundary Conditions | Project Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_TwoDimensionalSolver.html">4. Two Dimensional Solver | Project Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Tsunami Projekt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">2. Finite Volume Discretization | Project Report</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/02_FiniteVolumeDiscretization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="finite-volume-discretization-project-report">
+<h1>2. Finite Volume Discretization | Project Report<a class="headerlink" href="#finite-volume-discretization-project-report" title="Link to this heading"></a></h1>
+<section id="integration-of-interchangeability-of-solver-type">
+<h2>Integration of Interchangeability of Solver Type<a class="headerlink" href="#integration-of-interchangeability-of-solver-type" title="Link to this heading"></a></h2>
+<p>Altered the main() function to accept <code class="code docutils literal notranslate"><span class="pre">ROE</span></code> and <code class="code docutils literal notranslate"><span class="pre">FWAVE</span></code> as arguments.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w">   </span><span class="n">i_argc</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">i_argv</span><span class="p">[]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// number of cells in x- and y-direction</span>
+<span class="w">  </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_nx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// set cell size</span>
+<span class="w">  </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">l_dxy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// solver type</span>
+<span class="w">  </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">patches</span><span class="o">::</span><span class="n">WavePropagation1d</span><span class="o">::</span><span class="n">Solver</span><span class="w"> </span><span class="n">l_solverType</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;####################################&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;### Tsunami Lab                  ###&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;###                              ###&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;### https://scalable.uni-jena.de ###&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;####################################&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">i_argc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;invalid number of arguments, usage:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  ./build/tsunami_lab N_CELLS_X SOLVER&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;where N_CELLS_X is the number of cells in x-direction and SOLVER is the solver type to use.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">l_nx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="w"> </span><span class="n">i_argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">l_nx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;invalid number of cells&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">l_dxy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">l_nx</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">l_solver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l_solver</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;FWAVE&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">l_solverType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">patches</span><span class="o">::</span><span class="n">WavePropagation</span><span class="o">::</span><span class="n">FWave</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l_solver</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;ROE&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">l_solverType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">patches</span><span class="o">::</span><span class="n">WavePropagation</span><span class="o">::</span><span class="n">Roe</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;invalid solver type. Please use either ROE or FWAVE&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="w">  </span><span class="c1">//(...)</span>
+
+<span class="w">  </span><span class="c1">// iterate over time</span>
+<span class="w">  </span><span class="k">while</span><span class="p">(</span><span class="w"> </span><span class="n">l_simTime</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">l_endTime</span><span class="w"> </span><span class="p">){</span>
+
+<span class="w">    </span><span class="c1">//(...)</span>
+
+<span class="w">    </span><span class="n">l_waveProp</span><span class="o">-&gt;</span><span class="n">setGhostOutflow</span><span class="p">();</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">solver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;FWave&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">l_waveProp</span><span class="o">-&gt;</span><span class="n">timeStep</span><span class="p">(</span><span class="w"> </span><span class="n">l_scaling</span><span class="p">,</span><span class="w"> </span><span class="n">l_solverType</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">l_timeStep</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">l_simTime</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">l_dt</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Furthermore changed Wavepropagation1d.cpp for the same reason.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;WavePropagation1d.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;../solvers/FWave.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;../solvers/Roe.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">tsunami_lab::patches::WavePropagation1d::timeStep</span><span class="p">(</span><span class="w"> </span><span class="n">t_real</span><span class="w"> </span><span class="n">i_scaling</span><span class="p">,</span><span class="w"> </span><span class="n">Solver</span><span class="w"> </span><span class="n">i_solver</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">  </span><span class="c1">// pointers to old and new data</span>
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_hOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_h</span><span class="p">[</span><span class="n">m_step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_huOld</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_hu</span><span class="p">[</span><span class="n">m_step</span><span class="p">];</span>
+
+<span class="w">  </span><span class="n">m_step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">m_step</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_hNew</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="n">m_h</span><span class="p">[</span><span class="n">m_step</span><span class="p">];</span>
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_huNew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_hu</span><span class="p">[</span><span class="n">m_step</span><span class="p">];</span>
+
+<span class="w">  </span><span class="c1">// init new cell quantities</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">m_nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">l_hNew</span><span class="p">[</span><span class="n">l_ce</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l_hOld</span><span class="p">[</span><span class="n">l_ce</span><span class="p">];</span>
+<span class="w">    </span><span class="n">l_huNew</span><span class="p">[</span><span class="n">l_ce</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l_huOld</span><span class="p">[</span><span class="n">l_ce</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// iterate over edges and update with Riemann solutions</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_ed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">l_ed</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">m_nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">l_ed</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// determine left and right cell-id</span>
+<span class="w">    </span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_ceL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l_ed</span><span class="p">;</span>
+<span class="w">    </span><span class="n">t_idx</span><span class="w"> </span><span class="n">l_ceR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l_ed</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// compute net-updates</span>
+<span class="w">    </span><span class="n">t_real</span><span class="w"> </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="n">l_stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">l_hOld</span><span class="p">[</span><span class="n">l_ceL</span><span class="p">],</span><span class="w"> </span><span class="n">l_huOld</span><span class="p">[</span><span class="n">l_ceL</span><span class="p">]};</span>
+<span class="w">  </span><span class="n">t_real</span><span class="w"> </span><span class="n">l_stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">l_hOld</span><span class="p">[</span><span class="n">l_ceR</span><span class="p">],</span><span class="w"> </span><span class="n">l_huOld</span><span class="p">[</span><span class="n">l_ceR</span><span class="p">]};</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">i_solver</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FWave</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">solvers</span><span class="o">::</span><span class="n">FWave</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">l_stateLeft</span><span class="p">,</span>
+<span class="w">                        </span><span class="n">l_stateRight</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">                                  </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">solvers</span><span class="o">::</span><span class="n">Roe</span><span class="o">::</span><span class="n">netUpdates</span><span class="p">(</span><span class="w"> </span><span class="n">l_stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">                      </span><span class="n">l_stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">                      </span><span class="n">l_stateLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="w">                      </span><span class="n">l_stateRight</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="w">                                </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">                                </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// update the cells&#39; quantities</span>
+<span class="w">    </span><span class="n">l_hNew</span><span class="p">[</span><span class="n">l_ceL</span><span class="p">]</span><span class="w">  </span><span class="o">-=</span><span class="w"> </span><span class="n">i_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="n">l_huNew</span><span class="p">[</span><span class="n">l_ceL</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">i_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">l_hNew</span><span class="p">[</span><span class="n">l_ceR</span><span class="p">]</span><span class="w">  </span><span class="o">-=</span><span class="w"> </span><span class="n">i_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="n">l_huNew</span><span class="p">[</span><span class="n">l_ceR</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">i_scaling</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_netUpdates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="usage-of-the-middle-states-csv-as-sanity-check">
+<h2>Usage of the middle states csv as sanity check<a class="headerlink" href="#usage-of-the-middle-states-csv-as-sanity-check" title="Link to this heading"></a></h2>
+<p>Added new test cases in the Wavepropagation1d unit tests for the rare-rare and shock-shock problems.</p>
+<p>(Example for test case of rare-rare problem)</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">TEST_CASE</span><span class="p">(</span><span class="s">&quot;Test the 1d wave propagation FWave solver (Rare-Rare Problem&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;[WaveProp1dFWaveRareRare]&quot;</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief test state from middle_states.csv (Rare-Rare Problem)</span>
+<span class="cm"> *</span>
+<span class="cm"> * h_l = 7589.71304876485</span>
+<span class="cm"> * h_r = 7589.71304876485</span>
+<span class="cm"> * hu_l = -138.9853242339589</span>
+<span class="cm"> * hu_r = 138.9853242339589</span>
+<span class="cm"> * h* = 7589.203700916305</span>
+<span class="cm"> */</span>
+
+<span class="c1">// construct solver and setup a Rare-Rare problem</span>
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">patches</span><span class="o">::</span><span class="n">WavePropagation1d</span><span class="w"> </span><span class="nf">m_waveProp</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">setHeight</span><span class="p">(</span><span class="n">l_ce</span><span class="p">,</span>
+<span class="w">                       </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                       </span><span class="mf">7589.71304876485</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">setMomentumX</span><span class="p">(</span><span class="n">l_ce</span><span class="p">,</span>
+<span class="w">                          </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                          </span><span class="mf">-138.9853242339589</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">l_ce</span><span class="o">++</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">  </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">setHeight</span><span class="p">(</span><span class="n">l_ce</span><span class="p">,</span>
+<span class="w">                       </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                       </span><span class="mf">7589.71304876485</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">setMomentumX</span><span class="p">(</span><span class="n">l_ce</span><span class="p">,</span>
+<span class="w">                          </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                          </span><span class="mf">138.9853242339589</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// set outflow boundary condition</span>
+<span class="w">  </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">setGhostOutflow</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// perform a time step</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">timeStep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// test for h*</span>
+<span class="w">  </span><span class="n">REQUIRE</span><span class="p">(</span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">getHeight</span><span class="p">()[</span><span class="mi">49</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Approx</span><span class="p">(</span><span class="mf">7589.203700916305</span><span class="p">));</span>
+<span class="w">  </span><span class="n">REQUIRE</span><span class="p">(</span><span class="n">m_waveProp</span><span class="p">.</span><span class="n">getHeight</span><span class="p">()[</span><span class="mi">50</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Approx</span><span class="p">(</span><span class="mf">7589.203700916305</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="implementation-of-shock-shock-and-rare-rare-problems">
+<h2>Implementation of shock-shock and rare-rare Problems<a class="headerlink" href="#implementation-of-shock-shock-and-rare-rare-problems" title="Link to this heading"></a></h2>
+<p>Implemented the shock-shock and rare-rare problems as setups. They are similar to the dam break structure, but differ in the water height and the momenta.
+There is only one water height, and the momentum is opposite for the two setups.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">ShockShock1d</span><span class="o">::</span><span class="n">ShockShock1d</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_height</span><span class="p">,</span>
+<span class="w">                                                 </span><span class="n">t_real</span><span class="w"> </span><span class="n">i_momentum</span><span class="p">,</span>
+<span class="w">                                                 </span><span class="n">t_real</span><span class="w"> </span><span class="n">i_midPos</span><span class="p">)</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">m_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_height</span><span class="p">;</span>
+<span class="w">     </span><span class="n">m_momentum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_momentum</span><span class="p">;</span>
+<span class="w">     </span><span class="n">m_midPos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_midPos</span><span class="p">;</span>
+<span class="w"> </span><span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">ShockShock1d</span><span class="o">::</span><span class="n">getHeight</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                                 </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">m_height</span><span class="p">;</span>
+<span class="w"> </span><span class="p">}</span>
+
+<span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">ShockShock1d</span><span class="o">::</span><span class="n">getMomentumX</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                     </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i_x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">m_midPos</span><span class="p">)</span>
+<span class="w">     </span><span class="p">{</span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="n">m_momentum</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">   </span><span class="k">else</span>
+<span class="w">     </span><span class="p">{</span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">m_momentum</span><span class="p">;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w"> </span><span class="p">}</span>
+
+<span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">ShockShock1d</span><span class="o">::</span><span class="n">getMomentumY</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                                     </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">RareRare1d</span><span class="o">::</span><span class="n">RareRare1d</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_height</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">t_real</span><span class="w"> </span><span class="n">i_momentum</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">t_real</span><span class="w"> </span><span class="n">i_midPos</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">m_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_height</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_momentum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_momentum</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_midPos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i_midPos</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">RareRare1d</span><span class="o">::</span><span class="n">getHeight</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                              </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_height</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">RareRare1d</span><span class="o">::</span><span class="n">getMomentumX</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                  </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i_x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">m_midPos</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">m_momentum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">m_momentum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">setups</span><span class="o">::</span><span class="n">RareRare1d</span><span class="o">::</span><span class="n">getMomentumY</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                                  </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="observation-of-the-influence-of-initial-parameters-on-shock-shock-rare-rare-problems">
+<h2>Observation of the influence of initial parameters on shock-shock/rare-rare problems<a class="headerlink" href="#observation-of-the-influence-of-initial-parameters-on-shock-shock-rare-rare-problems" title="Link to this heading"></a></h2>
+<p>The higher the momentum <span class="math notranslate nohighlight">\(u_l\)</span>, the higher the middlestate height.
+The higher the height <span class="math notranslate nohighlight">\(h_l\)</span>, the higher the middlestate height and wavespeeds.</p>
+<video autoplay="True" height="300" loop="True" preload="auto" width="650"><source src="_static/rare_10_5_70.mp4" type="video/mp4"></video><video autoplay="True" height="300" loop="True" preload="auto" width="650"><source src="_static/rare_10_10_70.mp4" type="video/mp4"></video><p>The Wavespeeds are proportional to the square root of the initial height. Furthermore they are independent of the initial momentum.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}h_r &amp;= h_l \\
+hu_r &amp;= -hu_l \\
+u_r &amp;= -u_l \\
+h &amp;= \frac{1}{2}(h_l+h_r) = h_l = h_r \\
+u &amp;= \frac{u_l \sqrt{h_l} + u_r \sqrt{h_r}}{\sqrt{h_l}+\sqrt{h_r}} = 0 \\
+\lambda_{1,2} &amp;= \mp \sqrt{gh}\end{split}\]</div>
+</section>
+<section id="observation-of-the-influence-of-the-initial-parameters-on-dam-break-problems">
+<h2>Observation of the influence of the initial parameters on dam break problems<a class="headerlink" href="#observation-of-the-influence-of-the-initial-parameters-on-dam-break-problems" title="Link to this heading"></a></h2>
+<p>The higher the initial height difference, the higher the middle state. It affects the rarefaction wave as well in terms of wave speed (slowing down).
+Furthermore, it seems that the (shock) wavespeeds are proportional to the sqrt of the height.</p>
+</section>
+<section id="village-evacuation">
+<h2>Village Evacuation<a class="headerlink" href="#village-evacuation" title="Link to this heading"></a></h2>
+<p>initial values:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}s_{village} = 25km = 25000m\quad q_l = \begin{bmatrix} 14 \\ 0 \end{bmatrix}\quad q_r = \begin{bmatrix} 3.5 \\ 0.7 \end{bmatrix}\\\end{split}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[h_l = 14m\quad h_r = 3.5m\quad u_l = 0 \frac{m}{s}\quad u_r = 0.7 \frac{m}{s}\]</div>
+<p>calculate Roe height <span class="math notranslate nohighlight">\(h^{Roe}\)</span> and the Roe wavespeed <span class="math notranslate nohighlight">\(u^{Roe}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}h^{Roe} &amp;= \frac{1}{2} (h_l + h_r) = \frac{1}{2} (14m + 3.5m) = 8.75 m \\
+u^{Roe} &amp;= \frac{u_l \sqrt{h_l} + u_r \sqrt{h_r}}{\sqrt{h_l}+\sqrt{h_r}} = \frac{0 \frac{m}{s} \cdot \sqrt{14m} + 0.7 \frac{m}{s} \cdot \sqrt{3.5m}}{\sqrt{14m}+\sqrt{3.5m}} = 0.23333 \frac{m}{s}\\\end{split}\]</div>
+<p>now use <span class="math notranslate nohighlight">\(h^{Roe}\)</span> and <span class="math notranslate nohighlight">\(u^{Roe}\)</span> to calculate <span class="math notranslate nohighlight">\(\lambda_r^{Roe}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\lambda_r^{Roe} = u^{Roe} + \sqrt{gh^{Roe}} = 0.23333\frac{m}{s} + \sqrt{9.80665\frac{m}{s^2} \cdot 8.75m} = 9.49660 \frac{m}{s} \\\end{split}\]</div>
+<p>and finally calculate the time left for evacuation of the village <span class="math notranslate nohighlight">\(t_{evacuation}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[t_{evacuation} = \frac{s_{village}}{\lambda_r^{Roe}} = \frac{25000m}{9.49660 \frac{m}{s}} = 2.632,52 s = 43.88 min\]</div>
+</section>
+<section id="individual-member-contributions">
+<h2>Individual Member Contributions<a class="headerlink" href="#individual-member-contributions" title="Link to this heading"></a></h2>
+<p>Marek Sommerfeld: implementation of Solver interchangeability, Rare-Rare/Shock-Shock setup, CI Integration unit tests/Sphinx static page</p>
+<p>Moritz Rätz: Wavepropagation Unit test, Rare-Rare/Shock-Shock setup and Project Report</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="01_RiemannSolver.html" class="btn btn-neutral float-left" title="1. Riemann Solver | Project Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="03_BathymetryBoundaryConditions.html" class="btn btn-neutral float-right" title="3. Bathymetry &amp; Boundary Conditions | Project Report" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marek Sommerfeld, Moritz Rätz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

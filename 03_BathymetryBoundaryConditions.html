@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3. Bathymetry &amp; Boundary Conditions | Project Report &mdash; Tsunami Projekt  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="4. Two Dimensional Solver | Project Report" href="04_TwoDimensionalSolver.html" />
+    <link rel="prev" title="2. Finite Volume Discretization | Project Report" href="02_FiniteVolumeDiscretization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Tsunami Projekt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Tsunami Projekt: User Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_RiemannSolver.html">1. Riemann Solver | Project Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_FiniteVolumeDiscretization.html">2. Finite Volume Discretization | Project Report</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Bathymetry &amp; Boundary Conditions | Project Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-of-bathymetry-through-non-zero-source-term">Introduction of Bathymetry through non-zero source term</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-of-bathymetry-in-extended-solver">Example of bathymetry in extended solver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#reflecting-boundary-conditions">Reflecting Boundary Conditions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shock-shock-problem-with-boundary-conditions">Shock-Shock Problem with Boundary Conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hydraulic-jumps">Hydraulic Jumps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#computation-of-the-froude-number">Computation of the Froude number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-of-sub-supercritical-flow-setups">Implementation of Sub- / Supercritical Flow Setups</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-member-contributions">Individual Member Contributions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="04_TwoDimensionalSolver.html">4. Two Dimensional Solver | Project Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Tsunami Projekt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">3. Bathymetry &amp; Boundary Conditions | Project Report</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/03_BathymetryBoundaryConditions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bathymetry-boundary-conditions-project-report">
+<h1>3. Bathymetry &amp; Boundary Conditions | Project Report<a class="headerlink" href="#bathymetry-boundary-conditions-project-report" title="Link to this heading"></a></h1>
+<section id="introduction-of-bathymetry-through-non-zero-source-term">
+<h2>Introduction of Bathymetry through non-zero source term<a class="headerlink" href="#introduction-of-bathymetry-through-non-zero-source-term" title="Link to this heading"></a></h2>
+<p>Introduced the bathymetry through calculation of <span class="math notranslate nohighlight">\(\Delta x \Psi_{i-1/2}\)</span> into the FWave solver.</p>
+<p><span class="math notranslate nohighlight">\(\Delta x \Psi_{i-1/2} := \begin{bmatrix} 0 \\ -g (b_r - b_l) \frac{h_l+h_r}{2} \end{bmatrix}\)</span> :</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FWave::computedxPsi</span><span class="p">(</span><span class="n">real</span><span class="w"> </span><span class="n">in_stateLeft</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_stateRight</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">out_dxPsi</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">heightLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_stateLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">heightRight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_stateRight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">bathymetryLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_stateLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">bathymetryRight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_stateRight</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">      </span><span class="c1">//       -g       *      bathymetryRight - bathymetryLeft  *  heightLeft + heightRight   / 2</span>
+<span class="w">      </span><span class="n">out_dxPsi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="n">const_g</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">bathymetryRight</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">bathymetryLeft</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">((</span><span class="n">heightLeft</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">heightRight</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><span class="math notranslate nohighlight">\(\Delta f - \Delta x \Psi_{i-1/2}\)</span> :</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">FWave::computeEigencoefficients</span><span class="p">(</span><span class="n">real</span><span class="w"> </span><span class="n">in_stateLeft</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_stateRight</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">in_invertedEigenmatrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">real</span><span class="w"> </span><span class="n">out_eigencoefficients</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">fluxJumpLeft</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">fluxJumpRight</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">dxPsi</span><span class="p">;</span>
+
+<span class="w">      </span><span class="n">flux</span><span class="p">(</span><span class="n">in_stateLeft</span><span class="p">,</span><span class="w"> </span><span class="n">fluxJumpLeft</span><span class="p">);</span>
+<span class="w">      </span><span class="n">flux</span><span class="p">(</span><span class="n">in_stateRight</span><span class="p">,</span><span class="w"> </span><span class="n">fluxJumpRight</span><span class="p">);</span>
+<span class="w">      </span><span class="n">computedxPsi</span><span class="p">(</span><span class="n">in_stateLeft</span><span class="p">,</span><span class="w"> </span><span class="n">in_stateRight</span><span class="p">,</span><span class="w"> </span><span class="n">dxPsi</span><span class="p">);</span>
+
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="n">fluxJump</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="n">fluxJumpRight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">fluxJumpLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">              </span><span class="n">fluxJumpRight</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">fluxJumpLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dxPsi</span>
+<span class="w">      </span><span class="p">};</span>
+
+<span class="w">      </span><span class="n">out_eigencoefficients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_invertedEigenmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fluxJump</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in_invertedEigenmatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fluxJump</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">      </span><span class="n">out_eigencoefficients</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w">      </span><span class="n">in_invertedEigenmatrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fluxJump</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in_invertedEigenmatrix</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fluxJump</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="example-of-bathymetry-in-extended-solver">
+<h3>Example of bathymetry in extended solver<a class="headerlink" href="#example-of-bathymetry-in-extended-solver" title="Link to this heading"></a></h3>
+<p>Example visualization of the new bathymetry feature in the FWave solver.</p>
+<video autoplay="True" height="300" loop="True" preload="auto" width="650"><source src="_static/bathymetry_sin.mp4" type="video/mp4"></video></section>
+</section>
+<section id="reflecting-boundary-conditions">
+<h2>Reflecting Boundary Conditions<a class="headerlink" href="#reflecting-boundary-conditions" title="Link to this heading"></a></h2>
+<p>Implemented open and reflecting boundary conditions in the setGhostOutflow function:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">WavePropagation1d::setGhostOutflow</span><span class="p">(</span><span class="w"> </span><span class="n">Boundary</span><span class="w"> </span><span class="n">boundary</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">heightLocal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">height</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">momentumLocal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentum</span><span class="p">[</span><span class="n">step</span><span class="p">];</span>
+<span class="w">      </span><span class="n">real</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bathymetryLocal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bathymetry</span><span class="p">;</span>
+
+<span class="w">      </span><span class="c1">// set left boundary</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OUTFLOW</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="n">heightLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightLocal</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">               </span><span class="n">momentumLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumLocal</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">               </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">REFLECTING</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="n">heightLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">               </span><span class="n">momentumLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">               </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightLocal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="c1">// set right boundary</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OUTFLOW</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="n">heightLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="p">];</span>
+<span class="w">               </span><span class="n">momentumLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">momentumLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="p">];</span>
+<span class="w">               </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="p">];</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">REFLECTING</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="n">heightLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">               </span><span class="n">momentumLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">               </span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heightLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="p">]</span><span class="o">+</span><span class="n">bathymetryLocal</span><span class="p">[</span><span class="n">cellCount</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Therefore changed the main() command line input:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// boundary conditions</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">boundaryLeftArg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_argv</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">boundaryRightArg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_argv</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">Boundary</span><span class="w"> </span><span class="n">boundary</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundaryLeftArg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;OUTFLOW&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">OUTFLOW</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundaryLeftArg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;REFLECTING&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">REFLECTING</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;invalid boundary type for Left side. Please use either OUTFLOW or REFLECTING&quot;</span>
+<span class="w">           </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundaryRightArg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;OUTFLOW&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">OUTFLOW</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundaryRightArg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;REFLECTING&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">REFLECTING</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;invalid boundary type for Right side. Please use either OUTFLOW or REFLECTING&quot;</span>
+<span class="w">           </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="shock-shock-problem-with-boundary-conditions">
+<h3>Shock-Shock Problem with Boundary Conditions<a class="headerlink" href="#shock-shock-problem-with-boundary-conditions" title="Link to this heading"></a></h3>
+<p>The Boundary Conditions for Reflection does not seem to work at the moment, therefore we couldn’t compare the output to the one with normal conditions.</p>
+</section>
+</section>
+<section id="hydraulic-jumps">
+<h2>Hydraulic Jumps<a class="headerlink" href="#hydraulic-jumps" title="Link to this heading"></a></h2>
+<section id="computation-of-the-froude-number">
+<h3>Computation of the Froude number<a class="headerlink" href="#computation-of-the-froude-number" title="Link to this heading"></a></h3>
+<p>Computation of the maximum Froude number at inital time <span class="math notranslate nohighlight">\(t = 0\)</span>.</p>
+<p>subcritical setting:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+F :&amp;= \frac{u}{\sqrt{gh}} \\
+\\
+b(x) &amp;= \begin{cases} -1.8 - 0.05 (x-10)^2 \quad &amp;\text{if } x \in (8,12) \\ -2 \quad &amp;\text{else} \end{cases}\\
+\\
+h(x, 0) &amp;= -b(x) \quad \text{if } x \in [0,25] \\
+        &amp;= \begin{cases} 1.8 + 0.05 (x-10)^2 \\ 2 \end{cases}\\
+\\
+hu(x, 0) &amp;= 4.42 \quad \text{if } x \in [0,25] \\
+\\
+u(x, 0) &amp;= \frac{hu}{h} = \frac{4.42}{h} \\
+\\
+F = \frac{u}{\sqrt{gh}} &amp;= \frac{4.42}{\sqrt{gh} * h} = \frac{4.42}{\sqrt{g} * h^\frac{1}{2} * h} = \frac{4.42}{\sqrt{g} * h^\frac{3}{2}} \\
+\end{aligned}\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(\text{max(F) achieved at x = 10}\)</span></p>
+<a class="reference internal image-reference" href="_images/subcritical.png"><img alt="_images/subcritical.png" src="_images/subcritical.png" style="width: 700px;" /></a>
+<div class="math notranslate nohighlight">
+\[\begin{split}h &amp;= 1.8+0.05*(10-10)^2 = 1.8 \\
+F &amp;= \frac{4.42}{\sqrt{9.80665} * 1.8^\frac{3}{2}} \approx 0.58446\\\end{split}\]</div>
+<p>supercritical setting:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+F :&amp;= \frac{u}{\sqrt{gh}} \\
+\\
+b(x) &amp;= \begin{cases} -0.13 - 0.05 (x-10)^2 \quad &amp;\text{if } x \in (8,12) \\ -0.33 \quad &amp;\text{else} \end{cases}\\
+\\
+h(x, 0) &amp;= -b(x) \quad \text{if } x \in [0,25] \\
+        &amp;= \begin{cases} 0.13 + 0.05 (x-10)^2 \\ 0.33 \end{cases}\\
+\\
+hu(x, 0) &amp;= 0.18 \quad \text{if } x \in [0,25] \\
+\\
+u(x, 0) &amp;= \frac{hu}{h} = \frac{0.18}{h} \\
+\\
+F = \frac{u}{\sqrt{gh}} &amp;= \frac{0.18}{\sqrt{gh} * h} = \frac{0.18}{\sqrt{g} * h^\frac{1}{2} * h} = \frac{0.18}{\sqrt{g} * h^\frac{3}{2}} \\
+\end{aligned}\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(\text{max(F) achieved at x = 10}\)</span></p>
+<a class="reference internal image-reference" href="_images/supercritical.png"><img alt="_images/supercritical.png" src="_images/supercritical.png" style="width: 700px;" /></a>
+<div class="math notranslate nohighlight">
+\[\begin{split}h &amp;= 0.13+0.05*(10-10)^2 = 0.13 \\
+F &amp;= \frac{0.18}{\sqrt{9.80665} * 0.13^\frac{3}{2}} \approx 1.2263 \\\end{split}\]</div>
+</section>
+<section id="implementation-of-sub-supercritical-flow-setups">
+<h3>Implementation of Sub- / Supercritical Flow Setups<a class="headerlink" href="#implementation-of-sub-supercritical-flow-setups" title="Link to this heading"></a></h3>
+<p>Implemented subcritical flow setup based on dambreak setup and the given values on the website.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Subcritical1d::getHeight</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                  </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">25</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">getBathymetry</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Subcritical1d::getMomentumX</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                     </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">25</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">4.42</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Subcritical1d::getMomentumY</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                                     </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Subcritical1d::getBathymetry</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">in_x</span><span class="p">,</span>
+<span class="w">                                                                      </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">12</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="mf">-1.8</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.05</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">-2</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Implemented supercritical flow setup based on subcritical setup and the given values on the website.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Supercritical1d::getHeight</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                    </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">25</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">getBathymetry</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Supercritical1d::getMomentumX</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">i_x</span><span class="p">,</span>
+<span class="w">                                                                       </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">25</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">0.18</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Supercritical1d::getMomentumY</span><span class="p">(</span><span class="n">t_real</span><span class="p">,</span>
+<span class="w">                                                                       </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tsunami_lab</span><span class="o">::</span><span class="n">t_real</span><span class="w"> </span><span class="nf">tsunami_lab::setups::Supercritical1d::getBathymetry</span><span class="p">(</span><span class="n">t_real</span><span class="w"> </span><span class="n">in_x</span><span class="p">,</span>
+<span class="w">                                                                        </span><span class="n">t_real</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">12</span><span class="p">){</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="mf">-0.13</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.05</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">-0.33</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="individual-member-contributions">
+<h2>Individual Member Contributions<a class="headerlink" href="#individual-member-contributions" title="Link to this heading"></a></h2>
+<p>Marek Sommerfeld: implementation of boundary conditions and bathymetry</p>
+<p>Moritz Rätz: extended FWave solver, project report</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="02_FiniteVolumeDiscretization.html" class="btn btn-neutral float-left" title="2. Finite Volume Discretization | Project Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="04_TwoDimensionalSolver.html" class="btn btn-neutral float-right" title="4. Two Dimensional Solver | Project Report" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Marek Sommerfeld, Moritz Rätz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
