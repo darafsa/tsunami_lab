@@ -20,7 +20,6 @@ tsunami_lab::setups::DamBreak2d::DamBreak2d( real in_heightInner, real in_height
 
 tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getHeight( t_real in_x, t_real in_y ) const {
 	real distanceFromCenter = sqrt((centerDam[0]-in_x)*(centerDam[0]-in_x) + (centerDam[1]-in_y)*(centerDam[1]-in_y));
-	// t_real distanceFromCenter = sqrt(in_x*in_x + in_y*in_y);
 	if( distanceFromCenter < radiusDam ) {
 		return heightInner;
 	}
