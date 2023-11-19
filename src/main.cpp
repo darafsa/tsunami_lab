@@ -154,7 +154,7 @@ int main(int in_argc, char *in_argv[]) {
       tsunami_lab::real bathymetry = setup->getBathymetry(x, y);
 
       // set initial values in wave propagation solver
-      waveProp->setHeight(cellX, cellY, height);
+      waveProp->setHeight(cellX, cellY, height - bathymetry);
 
       waveProp->setMomentumX(cellX, cellY, momentumX);
 

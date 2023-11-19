@@ -20,10 +20,10 @@ tsunami_lab::setups::Bathymetry1d::Bathymetry1d( t_real i_heightLeft,
 tsunami_lab::t_real tsunami_lab::setups::Bathymetry1d::getHeight( t_real i_x,
                                                                	t_real ) const {
   if( i_x < m_locationDam ) {
-    return m_heightLeft - getBathymetry(i_x, 0);
+    return m_heightLeft;
   }
   else {
-    return m_heightRight - getBathymetry(i_x, 0);
+    return m_heightRight;
   }
 }
 
