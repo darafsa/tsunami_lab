@@ -5,7 +5,6 @@ html/
 latex/
 src/solvers/FWave.exe
 Catch2/
-Doxyfile
 .sconsign.dblite
 solutions/
 animations/
