@@ -41,15 +41,8 @@ class tsunami_lab::patches::WavePropagation2d: public WavePropagation {
 		//! bathymetry for all cells
 		real ** bathymetry;
 
-		real const * linearizeArray(real ** array2d) {
-			for(idx y = 0; y < cellCountY; y++) {
-				for(idx x = 0; x < cellCountX; x++) {
-					array1d[x + y*cellCountX] = array2d[x+1][y+1];
-				}
-			}
-			return array1d;
-		};
-
+		
+		void linearizeArray(real ** in_array2d, real * out_array1d);
 		void copyGhostCellsOutflow( real ** out_grid );
 		void copyGhostCellsReflecting( real ** out_grid, real in_value );
 
@@ -96,36 +89,28 @@ class tsunami_lab::patches::WavePropagation2d: public WavePropagation {
 		 *
 		 * @return water heights.
 		 */
-		real const * getHeight(){
-			return linearizeArray(height[step]);
-		}
+		real const * getHeight();
 
 		/**
 		 * @brief Gets the cells' momenta in x-direction.
 		 *
 		 * @return momenta in x-direction.
 		 **/
-		real const * getMomentumX(){
-			return linearizeArray(momentumX[step]);
-		}
+		real const * getMomentumX();
 
 		/**
 		 * @brief Gets the cells' momenta in y-direction.
 		 *
 		 * @return momenta in y-direction.
 		 **/
-		real const * getMomentumY(){
-			return linearizeArray(momentumY[step]);
-		}
+		real const * getMomentumY();
 
 		/**
 		 * @brief Get the bathymetry.
 		 * 
 		 * @return bathymetry.
 		 */
-		real const * getBathymetry(){
-			return linearizeArray(bathymetry);
-		}
+		real const * getBathymetry();
 
 		/**
 		 * @brief Sets the height of the cell to the given value.

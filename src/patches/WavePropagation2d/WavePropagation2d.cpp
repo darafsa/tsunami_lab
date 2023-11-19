@@ -31,6 +31,7 @@ WavePropagation2d::WavePropagation2d( idx in_cellCountX, idx in_cellCountY ) {
 	for ( idx x = 0; x < cellCountX + 2; x++) {
 		bathymetry[x] = new real[ cellCountY + 2];
 	}
+
 	array1d = new real[ cellCountX * cellCountY ];
 
 	// init to zero
@@ -46,6 +47,7 @@ WavePropagation2d::WavePropagation2d( idx in_cellCountX, idx in_cellCountY ) {
 			}
 		}
 	}
+
 	for ( idx cell = 0; cell < cellCountX * cellCountY; cell++ ) {
 		array1d[cell] = 0;
 	}
@@ -221,5 +223,49 @@ void WavePropagation2d::setGhostOutflow( Boundary in_boundary[2] ) {
 		copyGhostCellsReflecting( momentumX[step], 0 );
 		copyGhostCellsReflecting( momentumY[step], 0 );
 		copyGhostCellsReflecting( bathymetry, 20 );
+	}	
+}
+
+void WavePropagation2d::linearizeArray(real ** in_array2d, real * out_array1d) {
+	for(idx y = 0; y < cellCountY; y++) {
+		for(tsunami_lab::idx x = 0; x < cellCountX; x++) {
+			out_array1d[x + y*cellCountX] = in_array2d[x+1][y+1];
+		}
 	}
+}
+
+tsunami_lab::real const * WavePropagation2d::getHeight() {
+	real * height1d = new real[ cellCountX * cellCountY ];
+	for ( idx cell = 0; cell < cellCountX * cellCountY; cell++ ) {
+		height1d[cell] = 0;
+	}
+	linearizeArray(height[step], height1d);
+	return height1d;
+}
+
+tsunami_lab::real const * WavePropagation2d::getMomentumX() {
+	real * momentumX1d = new real[ cellCountX * cellCountY ];
+	for ( idx cell = 0; cell < cellCountX * cellCountY; cell++ ) {
+		momentumX1d[cell] = 0;
+	}
+	linearizeArray(momentumX[step], momentumX1d);
+	return momentumX1d;
+}
+
+tsunami_lab::real const * WavePropagation2d::getMomentumY() {
+	real * momentumY1d = new real[ cellCountX * cellCountY ];
+	for ( idx cell = 0; cell < cellCountX * cellCountY; cell++ ) {
+		momentumY1d[cell] = 0;
+	}
+	linearizeArray(momentumY[step], momentumY1d);
+	return momentumY1d;
+}
+
+tsunami_lab::real const * WavePropagation2d::getBathymetry() {
+	real * bathymetry1d = new real[ cellCountX * cellCountY ];
+	for ( idx cell = 0; cell < cellCountX * cellCountY; cell++ ) {
+		bathymetry1d[cell] = 0;
+	}
+	linearizeArray(bathymetry, bathymetry1d);
+	return bathymetry1d;
 }
