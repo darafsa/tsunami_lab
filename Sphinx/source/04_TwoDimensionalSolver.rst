@@ -273,7 +273,7 @@ is implemented in the computational domain :math:`[-50, 50]^2` :
 
 Visualized solution of 2dDambreak in paraview:
 
-.. video:: _static/dambreak2d.mp4
+.. video:: _static/dambreak_2d.mp4
   :autoplay:
   :loop:
   :height: 300
