@@ -8,17 +8,19 @@
  **/
 #include "DamBreak2d.h"
 
-tsunami_lab::setups::DamBreak2d::DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax ) {
+tsunami_lab::setups::DamBreak2d::DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax, real in_scaling ) {
 	heightInner = in_heightInner;
 	heightOuter = in_heightOuter;
-	radiusDam = in_radiusDam;
+	radiusDam = in_radiusDam * in_scaling;
+	scaling = in_scaling;
 
-	centerDam[0] = in_xMax/2;
-	centerDam[1] = in_yMax/2;
+	centerDam[0] = (in_xMax/2) * scaling;
+	centerDam[1] = (in_yMax/2) * scaling;
 }
 
 tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getHeight( t_real in_x, t_real in_y ) const {
 	real distanceFromCenter = sqrt((centerDam[0]-in_x)*(centerDam[0]-in_x) + (centerDam[1]-in_y)*(centerDam[1]-in_y));
+	// t_real distanceFromCenter = sqrt(in_x*in_x + in_y*in_y);
 	if( distanceFromCenter < radiusDam ) {
 		return heightInner;
 	}

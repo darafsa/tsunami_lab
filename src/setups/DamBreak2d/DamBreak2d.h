@@ -35,6 +35,9 @@ class tsunami_lab::setups::DamBreak2d: public Setup {
 		//! center point of dam; 0: x, 1: y
 		real centerDam[2];
 
+		//! cell size (scaling)
+		real scaling = 0;
+
 	public:
 		/**
 		 * @brief Constructor.
@@ -44,16 +47,18 @@ class tsunami_lab::setups::DamBreak2d: public Setup {
 		 * @param in_radiusDam radius of the dam.
 		 * @param in_xMax max x position.
 		 * @param in_yMax max y position.
+		 * @param in_scaling cell Size (scaling).
 		**/
-		DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax );
+		DamBreak2d( real in_heightInner, real in_heightOuter, real in_radiusDam, real in_xMax, real in_yMax, real in_scaling );
 
 		/**
 		 * @brief Gets the water height at a given point.
 		 *
 		 * @param in_x x-coordinate of the queried point.
+		 * @param in_y y-coordinate of the queried point.
 		 * @return height at the given point.
 		**/
-		real getHeight( t_real in_x, t_real y ) const;
+		real getHeight( t_real in_x, t_real in_y ) const;
 
 		/**
 		 * @brief Gets the momentum in x-direction.
