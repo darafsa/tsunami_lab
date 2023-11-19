@@ -12,6 +12,7 @@
 #include "setups/RareRare1d/RareRare1d.h"
 #include "setups/ShockShock1d/ShockShock1d.h"
 #include "setups/Bathymetry1d/Bathymetry1d.h"
+#include "setups/Bathymetry2d/Bathymetry2d.h"
 #include "setups/ShockShockReflective1d/ShockShockReflective1d.h"
 #include <cmath>
 #include <cstdlib>
@@ -123,7 +124,10 @@ int main(int in_argc, char *in_argv[]) {
 	 setup = new tsunami_lab::setups::ShockShockReflective1d(height, momentum, 5);
 	 waveProp = new tsunami_lab::patches::WavePropagation1d(xCount);
   } else if(setupArg == "DAMBREAK2D") {
-	 setup = new tsunami_lab::setups::DamBreak2d(10, 5, 5, 10, 10);
+	 setup = new tsunami_lab::setups::DamBreak2d(10, 5, 10, 100, 100, cellSize);
+	 waveProp = new tsunami_lab::patches::WavePropagation2d(xCount, yCount);
+  } else if(setupArg == "BATHYMETRY2D") {
+	 setup = new tsunami_lab::setups::Bathymetry2d(10, 5, 10, 100, 100, cellSize);
 	 waveProp = new tsunami_lab::patches::WavePropagation2d(xCount, yCount);
   } else {
     std::cerr << "invalid setup type. Please use either DAMBREAK, RARE or SHOCK" << std::endl;
@@ -194,12 +198,11 @@ int main(int in_argc, char *in_argv[]) {
       file.open(path);
 
       tsunami_lab::io::Csv::write(cellSize, 
-											 xCount, 
-											 1, 1, 
+											 xCount, yCount, xCount, 
 											 waveProp->getHeight(),
                                   waveProp->getBathymetry(), 
 											 waveProp->getMomentumX(), 
-											 nullptr, 
+											 waveProp->getMomentumY(), 
 											 file);
       file.close();
       nOut++;
