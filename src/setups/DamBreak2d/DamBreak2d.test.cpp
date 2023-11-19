@@ -8,7 +8,7 @@
 #include "DamBreak2d.h"
 
 TEST_CASE( "Test the two-dimensional dam break setup.", "[DamBreak2d]" ) {
-  tsunami_lab::setups::DamBreak2d l_damBreak( innerheight 5, outerheight 10, radiusDam 10, xMax 50, yMax 50);
+  tsunami_lab::setups::DamBreak2d l_damBreak( 5, 10, 10, 50, 50);
 
   // inner dam
   REQUIRE( l_damBreak.getHeight( 8, 4 ) == 10 );
