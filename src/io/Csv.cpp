@@ -5,6 +5,10 @@
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
  **/
 #include "Csv.h"
+#include <string>
+#include <fstream>
+#include <vector>
+#include <sstream>
 
 void tsunami_lab::io::Csv::write( t_real               i_dxy,
                                   t_idx                i_nx,
@@ -42,4 +46,26 @@ void tsunami_lab::io::Csv::write( t_real               i_dxy,
     }
   }
   io_stream << std::flush;
+}
+
+void tsunami_lab::io::Csv::read(str::string in_file,
+                                std::vector<t_real> &out_bathymetry) {
+  
+  // Create an input filestream
+  std::ifstream file(in_file);
+
+  std::string line;
+  std::string value;
+
+  while(std::getline(file, line)) {
+    std::stringstream lineSs(line);
+
+    //only extract bathymetry
+    for(int k = 0; k <= 2; i++) {
+      std::getline(lineSs, value, ',');
+    }
+    std::getline(lineSs, value, ',')
+
+    out_bathymetry.push_back(std::stod(value));
+   }
 }
