@@ -17,6 +17,9 @@ l_sources = [ 'solvers/FWave.cpp',
               'setups/ShockShock1d/ShockShock1d.cpp',
               'setups/Bathymetry1d/Bathymetry1d.cpp',
               'setups/ShockShockReflective1d/ShockShockReflective1d.cpp',
+              'setups/Bathymetry2d/Bathymetry2d.cpp',
+            #   'setups/Subcritical1d/Subcritical1d.cpp',
+            #   'setups/Supercritical1d/Supercritical1d.cpp',
               'io/Csv.cpp' ]
 
 for l_so in l_sources:
@@ -30,7 +33,14 @@ l_tests = [ 'tests.cpp',
             'solvers/Roe.test.cpp',
             'patches/WavePropagation1d/WavePropagation1d.test.cpp',
             'io/Csv.test.cpp',
-            'setups/DamBreak1d/DamBreak1d.test.cpp' ]
+            'setups/DamBreak1d/DamBreak1d.test.cpp',
+            # 'setups/DamBreak2d/DamBreak2d.test.cpp',
+            # 'setups/RareRare1d/RareRare1d.test.cpp',
+            # 'setups/ShockShock1d/ShockShock1d.test.cpp',
+            # 'setups/ShockShockReflective1d/ShockShockReflective1d.test.cpp',
+            # 'setups/Subcritial1d/Subcritial1d.test.cpp',
+            # 'setups/Supercritical1d/Supercritical1d.test.cpp' ]
+]
 
 for l_te in l_tests:
   env.tests.append( env.Object( l_te ) )
