@@ -48,7 +48,7 @@ void tsunami_lab::io::Csv::write( t_real               i_dxy,
   io_stream << std::flush;
 }
 
-void tsunami_lab::io::Csv::read(str::string in_file,
+void tsunami_lab::io::Csv::read(std::string in_file,
                                 std::vector<t_real> &out_bathymetry) {
   
   // Create an input filestream
@@ -61,11 +61,11 @@ void tsunami_lab::io::Csv::read(str::string in_file,
     std::stringstream lineSs(line);
 
     //only extract bathymetry
-    for(int k = 0; k <= 2; i++) {
+    for(int i = 0; i <= 2; i++) {
       std::getline(lineSs, value, ',');
     }
-    std::getline(lineSs, value, ',')
+    std::getline(lineSs, value, ',');
 
-    out_bathymetry.push_back(std::stod(value));
+    out_bathymetry.push_back(t_real(std::stod(value)));
    }
 }

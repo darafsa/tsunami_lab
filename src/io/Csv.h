@@ -49,8 +49,8 @@ class tsunami_lab::io::Csv {
      * @param in_file name of csv input file
      * @param out_bathymetry values of bathymetry in vector 
     */
-    void tsunami_lab::io::Csv::read(str::string in_file,
-                                    std::vector<t_real> &out_bathymetry);
+    static void read( std::string in_file, 
+	                   std::vector<t_real> &out_bathymetry );
 };
 
 #endif
